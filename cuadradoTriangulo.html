@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CREAR UN CUADRADO Y UN TRIÁNGULO</title>
+
+</head>
+<body>
+    <H2>CREAR UN CUADRADO Y UN TRIÁNGULO</H2>
+    <CANVAS id="myCanvas" width="500" height="500" style="border:4px solid black;"></CANVAS>
+
+    <SCRIPt>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        // Dibujar un cuadrado
+        ctx.beginPath();
+        ctx.rect(50, 50, 100, 150);  // x,y , ancho, alto
+        ctx.fillStyle = "red";
+        ctx.fill();
+        ctx.stroke();
+
+
+        // Dibujar un triángulo
+        ctx.beginPath();
+        ctx.moveTo(250, 50);  // inicio en el vertice superior del triángulo
+        ctx.lineTo(300, 150);  // vertice inferior derecho del triángulo
+        ctx.lineTo(200, 150);  // vertice inferior izquierdo del triángulo
+        ctx.closePath();
+        ctx.fillStyle = "lightcoral";
+        ctx.fill();
+        ctx.stroke();
+    </SCRIPt>
+    
+</body>
+</html>

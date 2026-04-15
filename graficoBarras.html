@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grafico de Barras</title>
+</head>
+<body>
+    <h2>Gráfico de Barras</h2>
+    <h2>Michael David Gutierrez Robles</h2>
+
+    <canvas id="myCanvas" width="500" height="500" style="border:4px solid black;"></canvas>
+
+    <script>
+        var canvas = document.getElementById("myCanvas");
+        var ctx = canvas.getContext("2d");
+
+        // 📊 Datos (altura de barras)
+        var datos = [50, 100, 150, 200, 250];
+
+        // 🎨 Colores
+        var colores = ["red", "blue", "green", "orange", "purple"];
+
+        var x = 50;        // posición inicial
+        var width = 40;    // ancho de cada barra
+        var espacio = 20;  // espacio entre barras
+
+        for (var i = 0; i < datos.length; i++) {
+
+            var altura = datos[i];
+            var y = 500 - altura; // invertir eje Y
+
+            // 🔲 Dibujar barra
+            ctx.beginPath();
+            ctx.rect(x, y, width, altura);
+            ctx.fillStyle = colores[i];
+            ctx.fill();
+            ctx.stroke();
+
+            // 🏷️ Texto (porcentaje arriba)
+            ctx.fillStyle = "red";
+            ctx.font = "14px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText((datos[i] / 2) + "%", x + width / 2, y - 5);
+
+            // mover siguiente barra
+            x += width + espacio;
+        }
+    </script>
+
+</body>
+</html>
