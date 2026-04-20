@@ -1,0 +1,267 @@
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    background: transparent;
+    font-family: var(--font-sans);
+  }
+
+  .container {
+    padding: 2rem 1rem;
+    max-width: 700px;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-bottom: 0.5rem;
+  }
+
+  .subtitle {
+    font-size: 14px;
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+  }
+
+  .chart-wrapper {
+    background: var(--color-background-primary);
+    border: 0.5px solid var(--color-border-tertiary);
+    border-radius: var(--border-radius-lg);
+    padding: 2rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+
+  .bars-container {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-around;
+    height: 300px;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .bar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    height: 100%;
+  }
+
+  .bar-fill {
+    width: 100%;
+    background: linear-gradient(to top, #378ADD, #85B7EB);
+    border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
+    transition: height 0.3s ease-out;
+    min-height: 4px;
+    position: relative;
+  }
+
+  .bar-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    margin-top: 8px;
+    min-width: 30px;
+    text-align: center;
+  }
+
+  .bar-label {
+    font-size: 12px;
+    color: var(--color-text-secondary);
+    margin-top: 4px;
+  }
+
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-top: 0.5px solid var(--color-border-tertiary);
+    font-size: 13px;
+  }
+
+  .info-label {
+    color: var(--color-text-secondary);
+  }
+
+  .info-value {
+    font-weight: 500;
+    color: var(--color-text-primary);
+  }
+
+  .controls {
+    display: flex;
+    gap: 8px;
+  }
+
+  button {
+    padding: 8px 16px;
+    background: var(--color-background-secondary);
+    border: 0.5px solid var(--color-border-secondary);
+    border-radius: var(--border-radius-md);
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--color-text-primary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  button:hover {
+    background: var(--color-background-tertiary);
+    border-color: var(--color-border-primary);
+  }
+
+  button:active {
+    transform: scale(0.98);
+  }
+
+  button.active {
+    background: #378ADD;
+    color: white;
+    border-color: #378ADD;
+  }
+</style>
+
+<div class="container">
+  <h1>Gráfico de Barras Dinámico</h1>
+  <p class="subtitle">Valores aleatorios que se actualizan cada segundo</p>
+
+  <div class="chart-wrapper">
+    <div class="bars-container" id="barsContainer">
+      <!-- Las barras se generarán aquí -->
+    </div>
+
+    <div class="info-row">
+      <span class="info-label">Máximo actual:</span>
+      <span class="info-value" id="maxValue">-</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Mínimo actual:</span>
+      <span class="info-value" id="minValue">-</span>
+    </div>
+    <div class="info-row">
+      <span class="info-label">Promedio:</span>
+      <span class="info-value" id="avgValue">-</span>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-top: 1.5rem;">
+      <button id="pauseBtn" class="active">⏸ Pausar</button>
+      <button id="resumeBtn">▶ Reanudar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const NUM_BARS = 5;
+  const MIN_VALUE = 10;
+  const MAX_VALUE = 100;
+  const UPDATE_INTERVAL = 1000; // 1 segundo
+
+  let values = [];
+  let isRunning = true;
+  let intervalId = null;
+
+  // Generar valores aleatorios
+  function generateRandomValues() {
+    return Array.from({ length: NUM_BARS }, () =>
+      Math.floor(Math.random() * (MAX_VALUE - MIN_VALUE + 1)) + MIN_VALUE
+    );
+  }
+
+  // Inicializar valores
+  values = generateRandomValues();
+
+  // Crear estructura HTML de las barras
+  function initBars() {
+    const container = document.getElementById('barsContainer');
+    container.innerHTML = '';
+
+    values.forEach((_, index) => {
+      const barDiv = document.createElement('div');
+      barDiv.className = 'bar';
+      barDiv.innerHTML = `
+        <div class="bar-fill" id="bar-${index}"></div>
+        <div class="bar-value" id="value-${index}"></div>
+        <div class="bar-label">Barra ${index + 1}</div>
+      `;
+      container.appendChild(barDiv);
+    });
+
+    updateBars();
+  }
+
+  // Actualizar alturas de barras
+  function updateBars() {
+    const maxVal = Math.max(...values);
+
+    values.forEach((value, index) => {
+      const barFill = document.getElementById(`bar-${index}`);
+      const valueDisplay = document.getElementById(`value-${index}`);
+
+      // Calcular altura proporcional (80% del contenedor para dejar espacio)
+      const heightPercent = (value / maxVal) * 80;
+
+      barFill.style.height = heightPercent + '%';
+      valueDisplay.textContent = value;
+    });
+
+    updateStats();
+  }
+
+  // Actualizar estadísticas
+  function updateStats() {
+    const max = Math.max(...values);
+    const min = Math.min(...values);
+    const avg = (values.reduce((a, b) => a + b, 0) / values.length).toFixed(1);
+
+    document.getElementById('maxValue').textContent = max;
+    document.getElementById('minValue').textContent = min;
+    document.getElementById('avgValue').textContent = avg;
+  }
+
+  // Actualizar valores cada segundo
+  function startUpdating() {
+    intervalId = setInterval(() => {
+      values = generateRandomValues();
+      updateBars();
+    }, UPDATE_INTERVAL);
+  }
+
+  // Detener actualizaciones
+  function stopUpdating() {
+    if (intervalId) {
+      clearInterval(intervalId);
+      intervalId = null;
+    }
+  }
+
+  // Eventos de botones
+  document.getElementById('pauseBtn').addEventListener('click', () => {
+    if (isRunning) {
+      stopUpdating();
+      isRunning = false;
+      document.getElementById('pauseBtn').classList.remove('active');
+      document.getElementById('resumeBtn').classList.add('active');
+    }
+  });
+
+  document.getElementById('resumeBtn').addEventListener('click', () => {
+    if (!isRunning) {
+      startUpdating();
+      isRunning = true;
+      document.getElementById('resumeBtn').classList.remove('active');
+      document.getElementById('pauseBtn').classList.add('active');
+    }
+  });
+
+  // Inicializar
+  initBars();
+  startUpdating();
+</script>

@@ -1,0 +1,41 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Creación de un circulo</title>
+</head>
+<body>
+    <h2>Dibujo de un circulo</h2>
+    <h2>HECHO POR MICHAEL DAVID GUTIERREZ ROBLES</h2>
+    <!-- DEFINIR UN AREA DE DIBUJO CON EL ELEMENTO CANVAS -->
+    <canvas id="myCanvas" width="500" height="500" style="border:4px solid black;"></canvas>
+    <!-- CÓDIGO JAVASCRIPT-->
+     <script>
+        //OBTENER EL CONTEXTO DE DIBUJO DEL CANVAS
+        var canvas = document.getElementById("myCanvas");
+
+        //SE OBTIENE EL CONTEXTO DE DIBUJO EN 2D
+        var ctx = canvas.getContext("2d");
+
+        //COMENZAR EL TRAZADO DE UNA (CIRCULO EN ESTE PUNTO SE INICIA EL DIBUJO)
+        ctx.beginPath();
+
+        //DIBUJAR EL ARCO PARA REPRESENTAR EL CIRCULO
+                    //LAS COORDENADAS (X,Y) UBIQUE EL CENTRO
+        //EL RADIO DEL CIRCULO ES DE 100PIXELES
+        ctx.arc(250, 250, 100,0, 2 * Math.PI);
+
+        // DEFINIR EL COLOR DEL RELLENO DEL CIRCULO
+        ctx.fillStyle = "red";
+
+        //RELLENA EL CIRUCLO CON UN COLOR DEFINIDO
+        ctx.fill();
+
+        // DIBUJAR EL BORDE DEL CIRCULOCON UN COLOR DIFERENTE
+        ctx.stroke();
+     </script>
+
+</body>
+</html>

@@ -1,0 +1,215 @@
+
+<style>
+  .container { padding: 1rem 0; font-family: var(--font-sans); }
+  .controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .badge { font-size: 12px; padding: 4px 10px; border-radius: var(--border-radius-md); background: var(--color-background-secondary); border: 0.5px solid var(--color-border-tertiary); color: var(--color-text-secondary); }
+  .badge span { font-weight: 500; color: var(--color-text-primary); }
+  canvas { border-radius: var(--border-radius-lg); border: 0.5px solid var(--color-border-tertiary); display: block; width: 100%; }
+  .btn-group { display: flex; gap: 8px; }
+  button { font-size: 13px; padding: 6px 14px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: transparent; color: var(--color-text-primary); cursor: pointer; }
+  button:hover { background: var(--color-background-secondary); }
+  button.active { background: var(--color-background-info); border-color: var(--color-border-info); color: var(--color-text-info); }
+  .slider-row { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--color-text-secondary); }
+  .label-row { display: flex; justify-content: space-between; font-size: 12px; color: var(--color-text-secondary); margin-top: 6px; }
+</style>
+
+<div class="container">
+  <h2 class="sr-only">Curva dinámica de y = A·cos(x), con control de amplitud y velocidad.</h2>
+
+  <div class="controls">
+    <div class="badge">y = <span id="amp-badge">1.00</span> · cos(x + <span id="offset-val">0.00</span>)</div>
+    <div class="badge">t = <span id="time-val">0</span>s</div>
+    <div class="btn-group">
+      <button id="btn-play" class="active">Pausar</button>
+      <button id="btn-reset">Reiniciar</button>
+    </div>
+  </div>
+
+  <div class="controls">
+    <div class="slider-row">
+      Amplitud
+      <input type="range" id="amplitude" min="0.1" max="2" step="0.05" value="1" style="width:90px;">
+      <span id="amp-val" style="font-weight:500;color:var(--color-text-primary);min-width:32px;">1.00</span>
+    </div>
+    <div class="slider-row">
+      Velocidad
+      <input type="range" id="speed" min="1" max="10" value="3" style="width:90px;">
+      <span id="speed-val" style="font-weight:500;color:var(--color-text-primary);min-width:24px;">3x</span>
+    </div>
+  </div>
+
+  <div style="position:relative;width:100%;height:300px;">
+    <canvas id="cosCanvas" role="img" aria-label="Gráfica animada de y = A·cos(x) con amplitud y velocidad ajustables."></canvas>
+  </div>
+  <div class="label-row">
+    <span>← x</span>
+    <span>A · cos(x) oscila entre -A y A</span>
+    <span>x →</span>
+  </div>
+</div>
+
+<script>
+const canvas = document.getElementById('cosCanvas');
+const ctx = canvas.getContext('2d');
+let offset = 0;
+let running = true;
+let time = 0;
+let lastTs = null;
+let speed = 3;
+let amplitude = 1;
+
+function resize() {
+  const w = canvas.parentElement.offsetWidth;
+  canvas.width = w * devicePixelRatio;
+  canvas.height = 300 * devicePixelRatio;
+  canvas.style.width = w + 'px';
+  canvas.style.height = '300px';
+}
+
+function isDark() {
+  return matchMedia('(prefers-color-scheme: dark)').matches;
+}
+
+function draw() {
+  const W = canvas.width, H = canvas.height;
+  const dark = isDark();
+  ctx.clearRect(0, 0, W, H);
+
+  const bg = dark ? '#1a1a1a' : '#ffffff';
+  const gridColor = dark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  const axisColor = dark ? 'rgba(255,255,255,0.25)' : 'rgba(0,0,0,0.2)';
+  const textColor = dark ? 'rgba(255,255,255,0.45)' : 'rgba(0,0,0,0.4)';
+  const lineColor = '#378ADD';
+  const dotColor = '#D85A30';
+  const ampLineColor = dark ? 'rgba(239,159,39,0.35)' : 'rgba(186,117,23,0.25)';
+
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+
+  const midY = H / 2;
+  const maxAmpY = H * 0.42;
+
+  ctx.strokeStyle = gridColor;
+  ctx.lineWidth = 1;
+  [-1, -0.5, 0.5, 1].forEach(v => {
+    const y = midY - v * maxAmpY;
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  });
+  for (let i = 0; i <= 8; i++) {
+    const x = (i / 8) * W;
+    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+  }
+
+  // amplitude envelope lines
+  const envY_top = midY - amplitude * maxAmpY;
+  const envY_bot = midY + amplitude * maxAmpY;
+  ctx.strokeStyle = ampLineColor;
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([6 * devicePixelRatio, 6 * devicePixelRatio]);
+  ctx.beginPath(); ctx.moveTo(0, envY_top); ctx.lineTo(W, envY_top); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(0, envY_bot); ctx.lineTo(W, envY_bot); ctx.stroke();
+  ctx.setLineDash([]);
+
+  ctx.strokeStyle = axisColor;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, midY); ctx.lineTo(W, midY); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(W * 0.08, 0); ctx.lineTo(W * 0.08, H); ctx.stroke();
+
+  // y-axis labels (dynamic based on amplitude)
+  ctx.fillStyle = textColor;
+  ctx.font = `${11 * devicePixelRatio}px var(--font-mono, monospace)`;
+  ctx.textAlign = 'right';
+  const labelX = W * 0.075;
+  [[amplitude.toFixed(2), 1], [(amplitude * 0.5).toFixed(2), 0.5], ['0', 0], [(-amplitude * 0.5).toFixed(2), -0.5], [(-amplitude).toFixed(2), -1]].forEach(([lbl, v]) => {
+    const y = midY - v * maxAmpY;
+    ctx.fillText(lbl, labelX, y + 4 * devicePixelRatio);
+  });
+
+  // cosine curve
+  const pts = 400;
+  const xEnd = 4 * Math.PI;
+  ctx.beginPath();
+  ctx.strokeStyle = lineColor;
+  ctx.lineWidth = 2.5 * devicePixelRatio;
+  ctx.lineJoin = 'round';
+  ctx.shadowColor = dark ? 'rgba(55,138,221,0.4)' : 'rgba(55,138,221,0.2)';
+  ctx.shadowBlur = 6 * devicePixelRatio;
+
+  for (let i = 0; i <= pts; i++) {
+    const xVal = (xEnd) * (i / pts);
+    const yVal = amplitude * Math.cos(xVal + offset);
+    const px = W * 0.08 + (xVal / xEnd) * W * 0.88;
+    const py = midY - yVal * maxAmpY;
+    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+  }
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // dot at x=0
+  const dotX = W * 0.08;
+  const dotYVal = amplitude * Math.cos(offset);
+  const dotPY = midY - dotYVal * maxAmpY;
+  ctx.beginPath();
+  ctx.arc(dotX, dotPY, 5 * devicePixelRatio, 0, Math.PI * 2);
+  ctx.fillStyle = dotColor;
+  ctx.fill();
+
+  ctx.setLineDash([5 * devicePixelRatio, 5 * devicePixelRatio]);
+  ctx.strokeStyle = dotColor;
+  ctx.lineWidth = devicePixelRatio;
+  ctx.globalAlpha = 0.5;
+  ctx.beginPath(); ctx.moveTo(dotX, dotPY); ctx.lineTo(dotX, midY); ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = dotColor;
+  ctx.font = `${12 * devicePixelRatio}px var(--font-mono, monospace)`;
+  ctx.textAlign = 'left';
+  const label = `${amplitude.toFixed(2)}·cos(${offset.toFixed(2)}) = ${dotYVal.toFixed(3)}`;
+  ctx.fillText(label, dotX + 10 * devicePixelRatio, dotPY - 8 * devicePixelRatio);
+}
+
+function animate(ts) {
+  if (!lastTs) lastTs = ts;
+  const dt = (ts - lastTs) / 1000;
+  lastTs = ts;
+  if (running) {
+    offset += dt * speed * 0.8;
+    time += dt;
+    document.getElementById('offset-val').textContent = offset.toFixed(2);
+    document.getElementById('time-val').textContent = Math.round(time);
+  }
+  draw();
+  requestAnimationFrame(animate);
+}
+
+document.getElementById('btn-play').addEventListener('click', function() {
+  running = !running;
+  this.textContent = running ? 'Pausar' : 'Reanudar';
+  this.classList.toggle('active', running);
+  if (running) lastTs = null;
+});
+
+document.getElementById('btn-reset').addEventListener('click', () => {
+  offset = 0; time = 0; lastTs = null;
+  document.getElementById('offset-val').textContent = '0.00';
+  document.getElementById('time-val').textContent = '0';
+  draw();
+});
+
+document.getElementById('speed').addEventListener('input', function() {
+  speed = parseInt(this.value);
+  document.getElementById('speed-val').textContent = speed + 'x';
+});
+
+document.getElementById('amplitude').addEventListener('input', function() {
+  amplitude = parseFloat(this.value);
+  document.getElementById('amp-val').textContent = amplitude.toFixed(2);
+  document.getElementById('amp-badge').textContent = amplitude.toFixed(2);
+  draw();
+});
+
+window.addEventListener('resize', () => { resize(); draw(); });
+resize();
+requestAnimationFrame(animate);
+</script>
