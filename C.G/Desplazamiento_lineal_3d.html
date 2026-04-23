@@ -1,0 +1,181 @@
+
+<h2 class="sr-only">Simulación interactiva de traslación lineal de un cubo en el eje X usando Three.js</h2>
+
+<div style="display:flex;flex-direction:column;gap:0;padding:1rem 0;">
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center;">
+    <button id="btn-play" onclick="togglePlay()" style="font-size:13px;padding:6px 16px;">⏸ Pausar</button>
+    <button id="btn-reset" onclick="resetCube()" style="font-size:13px;padding:6px 16px;">↺ Reiniciar</button>
+    <span style="font-size:13px;color:var(--color-text-secondary);margin-left:8px;">Velocidad:</span>
+    <input type="range" id="speed" min="1" max="10" value="3" step="1" style="width:100px;" oninput="updateSpeed(this.value)">
+    <span id="speed-label" style="font-size:13px;font-weight:500;min-width:20px;">3</span>
+  </div>
+
+  <canvas id="three-canvas" style="width:100%;border-radius:var(--border-radius-lg);border:0.5px solid var(--color-border-tertiary);display:block;"></canvas>
+
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px;">
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;">
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 4px;">Posición X</p>
+      <p id="pos-x" style="font-size:20px;font-weight:500;margin:0;font-family:var(--font-mono);">0.00</p>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;">
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 4px;">Posición Y</p>
+      <p id="pos-y" style="font-size:20px;font-weight:500;margin:0;font-family:var(--font-mono);">0.00</p>
+    </div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;">
+      <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 4px;">Posición Z</p>
+      <p id="pos-z" style="font-size:20px;font-weight:500;margin:0;font-family:var(--font-mono);">0.00</p>
+    </div>
+  </div>
+
+  <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem 1rem;margin-top:8px;">
+    <p style="font-size:12px;color:var(--color-text-secondary);margin:0 0 2px;">Dirección actual</p>
+    <p id="direction" style="font-size:14px;font-weight:500;margin:0;">→ Moviéndose hacia la derecha (+X)</p>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const canvas = document.getElementById('three-canvas');
+
+//Configuración de Three.js para renderizar la escena 3D del cubo en movimiento push
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(window.devicePixelRatio);
+renderer.shadowMap.enabled = true;
+
+//Escena
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0f1117);
+
+//Cámara
+const camera = new THREE.PerspectiveCamera(50, 2, 0.1, 100);
+camera.position.set(0, 4, 10);
+camera.lookAt(0, 0, 0);
+
+//Creación del cubo para la animación de traslación lineal en el eje X
+const geo = new THREE.BoxGeometry(1.5, 1.5, 1.5);
+const mat = new THREE.MeshPhongMaterial({ color: 0x572364, shininess: 80 });
+const cube = new THREE.Mesh(geo, mat);
+cube.castShadow = true;
+scene.add(cube);
+
+const edges = new THREE.EdgesGeometry(geo);
+const lineMat = new THREE.LineBasicMaterial({ color: 0x85B7EB });
+
+//bordes
+const wireframe = new THREE.LineSegments(edges, lineMat);
+cube.add(wireframe);
+
+// Suelo y entorno
+
+//Plano
+const planeGeo = new THREE.PlaneGeometry(24, 8);
+const planeMat = new THREE.MeshPhongMaterial({ color: 0x1a1d27, side: THREE.DoubleSide });
+const plane = new THREE.Mesh(planeGeo, planeMat);
+plane.rotation.x = -Math.PI / 2;
+plane.position.y = -1.2;
+plane.receiveShadow = true;
+scene.add(plane);
+
+//Grid
+const gridHelper = new THREE.GridHelper(24, 24, 0x2a2d3a, 0x2a2d3a);
+gridHelper.position.y = -1.19;
+scene.add(gridHelper);
+
+
+//Límites visuales
+const leftMarker = new THREE.Mesh(
+  new THREE.BoxGeometry(0.08, 2.5, 0.08),
+  new THREE.MeshPhongMaterial({ color: 0xE24B4A })
+);
+leftMarker.position.set(-5, -0.05, 0);
+scene.add(leftMarker);
+
+const rightMarker = leftMarker.clone();
+rightMarker.position.set(5, -0.05, 0);
+scene.add(rightMarker);
+
+
+// Iluminación
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 0.9);
+dirLight.position.set(5, 8, 5);
+dirLight.castShadow = true;
+scene.add(dirLight);
+
+const fillLight = new THREE.DirectionalLight(0x4488ff, 0.3);
+fillLight.position.set(-5, 2, -5);
+scene.add(fillLight);
+
+// Variables clave
+let posX = 0;
+let speed = 0.03;
+let direction = 1;
+let playing = true;
+const LIMIT = 5;
+
+
+//Funciones de control 
+function updateSpeed(v) {
+  speed = v * 0.01;
+  document.getElementById('speed-label').textContent = v;
+}
+
+//Pausar/Reanudar
+function togglePlay() {
+  playing = !playing;
+  document.getElementById('btn-play').textContent = playing ? '⏸ Pausar' : '▶ Reanudar';
+}
+
+
+// Reiniciar
+function resetCube() {
+  posX = 0;
+  direction = 1;
+  cube.position.x = 0;
+}
+
+// Responsividad
+function resize() {
+  const w = canvas.clientWidth;
+  const h = Math.round(w / 2);
+  canvas.height = h;
+  renderer.setSize(w, h, false);
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+}
+resize();
+window.addEventListener('resize', resize);
+
+
+// Animación
+function animate() {
+  requestAnimationFrame(animate);
+
+  if (playing) {
+    posX += speed * direction; // Movimiento del cubo
+    if (posX >= LIMIT) { posX = LIMIT; direction = -1; } // Rebote en límites
+    if (posX <= -LIMIT) { posX = -LIMIT; direction = 1; } // Rebote en límites
+    cube.position.x = posX; // Aplicar movimiento
+  }
+
+  document.getElementById('pos-x').textContent = cube.position.x.toFixed(2); // Muestra valores en tiempo real
+  document.getElementById('pos-y').textContent = cube.position.y.toFixed(2); // Muestra valores en tiempo real
+  document.getElementById('pos-z').textContent = cube.position.z.toFixed(2); // Muestra valores en tiempo real
+
+  const dirEl = document.getElementById('direction');
+  if (!playing) {
+    dirEl.textContent = '⏸ Pausado';
+  } else {
+    dirEl.textContent = direction === 1
+      ? '→ Moviéndose hacia la derecha (+X)'
+      : '← Moviéndose hacia la izquierda (−X)';
+  }
+
+  renderer.render(scene, camera); // Dibuja todo en pantalla
+}
+animate();
+</script>

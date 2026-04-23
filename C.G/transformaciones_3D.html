@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transformaciones 3D</title>
+    <style>
+        /* ── Fuentes externas: monoespacio para datos y Orbitron para títulos ── */
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap');
+
+        /* ── Reset global: quita márgenes y usa box-sizing consistente ── */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        /* ── Variables de color del tema oscuro/HUD ── */
+        :root {
+            --bg:      #050810; /* fondo principal */
+            --panel:   #0a0f1e; /* fondo del panel lateral */
+            --border:  #1a2a4a; /* bordes sutiles */
+            --accent1: #00d4ff; /* azul  → traslación */
+            --accent2: #ff6b35; /* naranja → rotación */
+            --accent3: #7fff00; /* verde  → escalado */
+            --text:    #c8d8f0; /* texto principal */
+            --dim:     #4a6080; /* texto secundario/apagado */
+        }
+
+        /* ── Cuerpo: columna vertical, pantalla completa, sin scroll ── */
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Share Tech Mono', monospace;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* ── Barra superior de título ── */
+        header {
+            padding: 10px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--panel);
+            flex-shrink: 0; /* no se encoge aunque falte espacio */
+        }
+
+        header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--accent1);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        /* ── Etiqueta decorativa en la esquina del header ── */
+        .badge {
+            font-size: 10px;
+            color: var(--accent3);
+            letter-spacing: 2px;
+            border: 1px solid var(--accent3);
+            padding: 2px 8px;
+            border-radius: 2px;
+        }
+
+        /* ── Contenedor principal: canvas a la izquierda, panel a la derecha ── */
+        .layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* ── Área del viewport 3D: ocupa todo el espacio libre ── */
+        #canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* ── El canvas de Three.js se vuelve bloque para evitar espacio extra ── */
+        canvas { display: block; }
+
+        /* ── Etiquetas de esquina sobre el canvas (HUD) ── */
+        .corner-label {
+            position: absolute;
+            font-size: 9px;
+            color: var(--dim);
+            letter-spacing: 1px;
+            pointer-events: none; /* no intercepta clics del mouse */
+        }
+        .corner-label.tl { top: 12px; left: 12px; }
+        .corner-label.tr { top: 12px; right: 12px; text-align: right; }
+        .corner-label.bl { bottom: 12px; left: 12px; }
+
+        /* ── Mira central decorativa (cruz) ── */
+        .crosshair {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            opacity: 0.15;
+        }
+        .crosshair::before, .crosshair::after {
+            content: ''; position: absolute; background: var(--accent1);
+        }
+        .crosshair::before { width: 20px; height: 1px; top: 0; left: -10px; }
+        .crosshair::after  { width: 1px; height: 20px; top: -10px; left: 0; }
+
+        /* ── Panel lateral de controles y estadísticas ── */
+        .panel {
+            width: 240px;
+            background: var(--panel);
+            border-left: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+
+        .panel-section {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .panel-section h3 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 9px;
+            letter-spacing: 3px;
+            margin-bottom: 12px;
+            color: var(--dim);
+            text-transform: uppercase;
+        }
+
+        .key-group { margin-bottom: 10px; }
+        .key-group-label { font-size: 9px; color: var(--dim); letter-spacing: 1px; margin-bottom: 5px; }
+
+        .key-row { display: flex; gap: 5px; align-items: center; flex-wrap: wrap; }
+
+        /* ── Botón visual de tecla ── */
+        .key {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 28px; height: 24px; padding: 0 6px;
+            border: 1px solid var(--border); border-radius: 3px;
+            font-size: 10px; font-family: 'Share Tech Mono', monospace;
+            background: #0d1525; color: var(--text);
+            transition: all 0.1s; cursor: default; white-space: nowrap;
+        }
+
+        /* ── Estados activos según tipo de transformación ── */
+        .key.active-t { border-color: var(--accent1); color: var(--accent1); background: rgba(0,212,255,0.1); }
+        .key.active-r { border-color: var(--accent2); color: var(--accent2); background: rgba(255,107,53,0.1); }
+        .key.active-s { border-color: var(--accent3); color: var(--accent3); background: rgba(127,255,0,0.1); }
+
+        .key-desc { font-size: 9px; color: var(--dim); margin-left: 4px; }
+
+        /* ── Filas de estadística ── */
+        .stat-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 4px 0; border-bottom: 1px solid rgba(26,42,74,0.5);
+        }
+        .stat-label { font-size: 9px; color: var(--dim); letter-spacing: 1px; }
+        .stat-value { font-size: 10px; font-family: 'Share Tech Mono', monospace; }
+        .stat-value.t { color: var(--accent1); }
+        .stat-value.r { color: var(--accent2); }
+        .stat-value.s { color: var(--accent3); }
+
+        /* ── Barra de pastillas de los 3 conceptos ── */
+        .transform-bar { display: flex; gap: 4px; padding: 10px 16px; border-bottom: 1px solid var(--border); }
+        .t-pill {
+            flex: 1; text-align: center; padding: 4px 0;
+            font-size: 8px; letter-spacing: 2px; border-radius: 2px;
+            font-family: 'Orbitron', sans-serif; border: 1px solid;
+        }
+        .t-pill.traslacion { color: var(--accent1); border-color: var(--accent1); background: rgba(0,212,255,0.07); }
+        .t-pill.rotacion   { color: var(--accent2); border-color: var(--accent2); background: rgba(255,107,53,0.07); }
+        .t-pill.escalado   { color: var(--accent3); border-color: var(--accent3); background: rgba(127,255,0,0.07); }
+
+        /* ── Botón reset ── */
+        .reset-btn {
+            margin: 12px 16px; padding: 8px;
+            background: transparent; border: 1px solid var(--border);
+            color: var(--dim); font-family: 'Share Tech Mono', monospace;
+            font-size: 10px; letter-spacing: 2px; cursor: pointer;
+            border-radius: 2px; transition: all 0.2s;
+            width: calc(100% - 32px); text-align: center;
+        }
+        .reset-btn:hover { border-color: var(--accent1); color: var(--accent1); }
+
+        /* ── Scrollbar del panel ── */
+        .panel::-webkit-scrollbar { width: 4px; }
+        .panel::-webkit-scrollbar-track { background: var(--bg); }
+        .panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+        /* ── Cursor del canvas según estado del mouse ── */
+        #canvas-container          { cursor: grab; }
+        #canvas-container.dragging { cursor: grabbing; }
+    </style>
+</head>
+<body>
+
+<!-- HEADER: título de la práctica y tecnología usada -->
+<header>
+    <h1>Transformaciones 3D &mdash; Control de Objeto</h1>
+    <span class="badge">THREE.JS · INTERACTIVO</span>
+</header>
+
+<!-- LAYOUT: viewport 3D a la izquierda, panel de controles a la derecha -->
+<div class="layout">
+
+    <!-- Contenedor donde Three.js inyectará el canvas WebGL -->
+    <div id="canvas-container">
+        <div class="crosshair"></div>
+        <div class="corner-label tl">VIEWPORT · 3D</div>
+        <div class="corner-label tr" id="fps-label">FPS: —</div>
+        <div class="corner-label bl">WASD/RF · FLECHAS/QE · ZX &nbsp;|&nbsp; CLIC DER = CÁMARA</div>
+    </div>
+
+    <!-- Panel lateral con controles y estado -->
+    <div class="panel">
+
+        <!-- Identificadores de los 3 tipos de transformación -->
+        <div class="transform-bar">
+            <div class="t-pill traslacion">TRASLAC.</div>
+            <div class="t-pill rotacion">ROTACIÓN</div>
+            <div class="t-pill escalado">ESCALADO</div>
+        </div>
+
+        <!-- SECCIÓN: Traslación -->
+        <div class="panel-section">
+            <h3>Traslación</h3>
+            <div class="key-group">
+                <div class="key-group-label">EJE X / Z</div>
+                <div class="key-row">
+                    <span class="key" id="k-a">A</span>
+                    <span class="key" id="k-d">D</span>
+                    <span class="key-desc">← →</span>
+                </div>
+                <div class="key-row" style="margin-top:4px">
+                    <span class="key" id="k-w">W</span>
+                    <span class="key" id="k-s">S</span>
+                    <span class="key-desc">↑ ↓</span>
+                </div>
+            </div>
+            <div class="key-group">
+                <div class="key-group-label">EJE Y</div>
+                <div class="key-row">
+                    <span class="key" id="k-r">R</span>
+                    <span class="key" id="k-f">F</span>
+                    <span class="key-desc">sube / baja</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: Rotación -->
+        <div class="panel-section">
+            <h3>Rotación</h3>
+            <div class="key-group">
+                <div class="key-group-label">EJE Y</div>
+                <div class="key-row">
+                    <span class="key" id="k-left">◀</span>
+                    <span class="key" id="k-right">▶</span>
+                    <span class="key-desc">girar</span>
+                </div>
+            </div>
+            <div class="key-group">
+                <div class="key-group-label">EJE X</div>
+                <div class="key-row">
+                    <span class="key" id="k-up">▲</span>
+                    <span class="key" id="k-down">▼</span>
+                    <span class="key-desc">inclinar</span>
+                </div>
+            </div>
+            <div class="key-group">
+                <div class="key-group-label">EJE Z</div>
+                <div class="key-row">
+                    <span class="key" id="k-q">Q</span>
+                    <span class="key" id="k-e">E</span>
+                    <span class="key-desc">rodar</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: Escalado -->
+        <div class="panel-section">
+            <h3>Escalado</h3>
+            <div class="key-group">
+                <div class="key-group-label">TAMAÑO</div>
+                <div class="key-row">
+                    <span class="key" id="k-z">Z</span>
+                    <span class="key" id="k-x">X</span>
+                    <span class="key-desc">+ / −</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: Cámara -->
+        <div class="panel-section">
+            <h3>Cámara</h3>
+            <div class="key-group">
+                <div class="key-group-label">ÓRBITA</div>
+                <div class="key-row">
+                    <span class="key">🖱 DER</span>
+                    <span class="key-desc">arrastrar</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: Estado en tiempo real del objeto -->
+        <div class="panel-section">
+            <h3>Estado del Objeto</h3>
+            <div class="stat-row"><span class="stat-label">POS X</span><span class="stat-value t" id="st-px">0.00</span></div>
+            <div class="stat-row"><span class="stat-label">POS Y</span><span class="stat-value t" id="st-py">0.00</span></div>
+            <div class="stat-row"><span class="stat-label">POS Z</span><span class="stat-value t" id="st-pz">0.00</span></div>
+            <div class="stat-row"><span class="stat-label">ROT X</span><span class="stat-value r" id="st-rx">0°</span></div>
+            <div class="stat-row"><span class="stat-label">ROT Y</span><span class="stat-value r" id="st-ry">0°</span></div>
+            <div class="stat-row"><span class="stat-label">ROT Z</span><span class="stat-value r" id="st-rz">0°</span></div>
+            <div class="stat-row"><span class="stat-label">ESCALA</span><span class="stat-value s" id="st-sc">1.00</span></div>
+        </div>
+
+        <!-- Botón para volver al estado inicial -->
+        <button class="reset-btn" id="reset-btn">[ RESET ]</button>
+
+    </div>
+</div>
+
+
+<!-- Three.js r128 desde CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+
+    // ════════════════════════════════════════════════════
+    // 1. REFERENCIAS AL DOM
+    // ════════════════════════════════════════════════════
+
+    // Div donde se insertará el canvas WebGL de Three.js
+    const container = document.getElementById('canvas-container');
+
+
+    // ════════════════════════════════════════════════════
+    // 2. ESCENA, CÁMARA Y RENDERIZADOR
+    // ════════════════════════════════════════════════════
+
+    // La ESCENA es el contenedor de todos los objetos, luces y helpers 3D
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x050810);  // color de fondo oscuro azulado
+    scene.fog = new THREE.FogExp2(0x050810, 0.04); // niebla exponencial: objetos lejanos se difuminan
+
+    // CÁMARA perspectiva: simula cómo ve el ojo humano (objetos lejanos se ven más pequeños)
+    //   fov   = 60° campo de visión (natural, cinematográfico)
+    //   aspect = relación ancho/alto (se recalcula al redimensionar)
+    //   near  = 0.1  → distancia mínima visible
+    //   far   = 200  → distancia máxima visible
+    const camera = new THREE.PerspectiveCamera(60, 1, 0.1, 200);
+    camera.position.set(4, 3, 6); // posición inicial: desplazada adelante, arriba y a la derecha
+    camera.lookAt(0, 0, 0);       // la cámara apunta siempre al origen de la escena
+
+    // RENDERER: convierte la escena 3D en una imagen 2D usando WebGL
+    const renderer = new THREE.WebGLRenderer({ antialias: true }); // antialias = bordes suavizados
+    renderer.setPixelRatio(window.devicePixelRatio); // soporte para pantallas Retina / HiDPI
+    renderer.shadowMap.enabled = true;               // habilitar cálculo de sombras
+    renderer.shadowMap.type    = THREE.PCFSoftShadowMap; // sombras suaves (más realistas)
+    container.appendChild(renderer.domElement);      // insertar el <canvas> dentro del div
+
+
+    // ════════════════════════════════════════════════════
+    // 3. ILUMINACIÓN
+    // ════════════════════════════════════════════════════
+
+    // LUZ AMBIENTAL: ilumina toda la escena por igual, sin proyectar sombras
+    // Simula la luz de fondo difusa del entorno
+    const ambient = new THREE.AmbientLight(0x112233, 1.2); // tono azul oscuro, intensidad 1.2
+    scene.add(ambient);
+
+    // LUZ DIRECCIONAL: simula una fuente lejana como el sol
+    // Los rayos son paralelos y proyectan sombras definidas
+    const dirLight = new THREE.DirectionalLight(0x00d4ff, 2); // color cian, intensidad 2
+    dirLight.position.set(5, 8, 5); // posición desde donde viene la luz
+    dirLight.castShadow = true;     // esta luz genera sombras en la escena
+    scene.add(dirLight);
+
+    // LUZ PUNTUAL 1: foco de color naranja, orbita alrededor de la escena (se anima)
+    // PointLight(color, intensidad, radio de alcance en unidades)
+    const pointLight1 = new THREE.PointLight(0xff6b35, 3, 20);
+    pointLight1.position.set(-4, 2, -3);
+    scene.add(pointLight1);
+
+    // LUZ PUNTUAL 2: foco de color verde, orbita en sentido contrario (se anima)
+    const pointLight2 = new THREE.PointLight(0x7fff00, 2, 15);
+    pointLight2.position.set(3, -2, 3);
+    scene.add(pointLight2);
+
+
+    // ════════════════════════════════════════════════════
+    // 4. PISO Y GRILLA DE REFERENCIA
+    // ════════════════════════════════════════════════════
+
+    // GRILLA: muestra líneas de cuadrícula para facilitar la percepción del espacio 3D
+    // GridHelper(tamaño total, cantidad de divisiones, colorCentro, colorBorde)
+    const gridHelper = new THREE.GridHelper(30, 30, 0x1a2a4a, 0x0d1525);
+    scene.add(gridHelper);
+
+    // PLANO del suelo: superficie que recibe las sombras proyectadas por el objeto
+    const floorGeo = new THREE.PlaneGeometry(30, 30); // plano cuadrado de 30×30 unidades
+    const floorMat = new THREE.MeshStandardMaterial({
+        color: 0x05080f, // casi negro
+        roughness: 1,    // sin reflejos especulares (mate total)
+        metalness: 0     // no metálico
+    });
+    const floor = new THREE.Mesh(floorGeo, floorMat);
+    floor.rotation.x  = -Math.PI / 2; // rotar −90° para que quede horizontal
+    floor.position.y  = -0.01;        // ligeramente por debajo de la grilla
+    floor.receiveShadow = true;       // el suelo acepta sombras
+    scene.add(floor);
+
+
+    // ════════════════════════════════════════════════════
+    // 5. EJES DE REFERENCIA XYZ
+    // ════════════════════════════════════════════════════
+
+    // AxesHelper muestra los 3 ejes con colores estándar:
+    //   X = rojo, Y = verde, Z = azul
+    const axesHelper = new THREE.AxesHelper(2); // longitud de cada eje: 2 unidades
+    scene.add(axesHelper);
+
+
+    // ════════════════════════════════════════════════════
+    // 6. OBJETO PRINCIPAL: ICOSAEDRO
+    // ════════════════════════════════════════════════════
+
+    // GEOMETRÍA: icosaedro = sólido platónico de 20 caras triangulares
+    // IcosahedronGeometry(radio, nivel de detalle)
+    const geo = new THREE.IcosahedronGeometry(0.9, 1);
+
+    // MATERIAL PBR (Physically Based Rendering): reacciona a las luces de forma realista
+    const mat = new THREE.MeshStandardMaterial({
+        color:     0x1a3a6a, // color base azul oscuro
+        emissive:  0x001a33, // emisión propia (pequeño brillo interno)
+        roughness: 0.3,      // semipulido (algo de reflexión especular)
+        metalness: 0.8,      // muy metálico (refleja mucho las luces de colores)
+        wireframe: false     // mostrar como sólido, no solo aristas
+    });
+
+    // MESH = geometría + material = objeto visible en la escena
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.castShadow    = true; // el icosaedro proyecta su sombra sobre el suelo
+    mesh.receiveShadow = true; // puede recibir sombras de otros objetos
+    scene.add(mesh);
+
+    // WIREFRAME OVERLAY: segunda malla sobre la misma geometría, solo aristas
+    // Se agrega como hijo del mesh principal → se transforma junto a él automáticamente
+    const wireMat  = new THREE.MeshBasicMaterial({
+        color: 0x00d4ff, wireframe: true, transparent: true, opacity: 0.18
+    });
+    const wireMesh = new THREE.Mesh(geo, wireMat);
+    mesh.add(wireMesh); // hijo del mesh: hereda posición, rotación y escala
+
+
+    // ════════════════════════════════════════════════════
+    // 7. SOMBRA DECORATIVA (círculo bajo el objeto)
+    // ════════════════════════════════════════════════════
+
+    // Círculo semitransparente que simula una sombra difusa debajo del icosaedro
+    const shadowGeo  = new THREE.CircleGeometry(1, 32); // radio 1, 32 segmentos
+    const shadowMat  = new THREE.MeshBasicMaterial({ color: 0x00d4ff, transparent: true, opacity: 0.06 });
+    const shadowBlob = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowBlob.rotation.x = -Math.PI / 2; // ponerlo horizontal (igual que el suelo)
+    shadowBlob.position.y = 0.01;         // ligeramente encima del suelo para no parpadear
+    scene.add(shadowBlob);
+
+
+    // ════════════════════════════════════════════════════
+    // 8. CAMPO DE PARTÍCULAS (fondo ambiental)
+    // ════════════════════════════════════════════════════
+
+    const particleCount = 400; // cantidad de puntos de luz en el fondo
+    const particleGeo   = new THREE.BufferGeometry(); // geometría de bajo nivel (más eficiente)
+
+    // Generar posiciones aleatorias: array plano donde cada 3 valores = (x, y, z) de un punto
+    const pPositions = new Float32Array(particleCount * 3);
+    for (let i = 0; i < particleCount; i++) {
+        pPositions[i * 3]     = (Math.random() - 0.5) * 40; // x entre −20 y +20
+        pPositions[i * 3 + 1] = (Math.random() - 0.5) * 20; // y entre −10 y +10
+        pPositions[i * 3 + 2] = (Math.random() - 0.5) * 40; // z entre −20 y +20
+    }
+
+    // Asignar las posiciones como atributo "position" de la geometría
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+
+    // PointsMaterial: renderiza cada vértice como un punto visible (no triángulo)
+    const particleMat = new THREE.PointsMaterial({ color: 0x1a3a6a, size: 0.04 });
+
+    // Points: objeto especial de Three.js para renderizar nubes de puntos
+    scene.add(new THREE.Points(particleGeo, particleMat));
+
+
+    // ════════════════════════════════════════════════════
+    // 9. CONSTANTES Y ESTADO
+    // ════════════════════════════════════════════════════
+
+    const keys    = {};    // registro de teclas presionadas: { 'KeyA': true, ... }
+    const SPEED   = 0.04;  // unidades movidas por frame en traslación
+    const ROT_SPD = 0.025; // radianes girados por frame en rotación
+    const SCL_SPD = 0.012; // incremento de escala por frame en escalado
+    const MIN_SCL = 0.2;   // escala mínima = 20% del tamaño original
+    const MAX_SCL = 4.0;   // escala máxima = 400% del tamaño original
+    let   scale   = 1;     // escala actual del objeto (comienza en tamaño normal)
+
+
+    // ════════════════════════════════════════════════════
+    // 10. CÁMARA ORBITAL CON CLIC DERECHO
+    // ════════════════════════════════════════════════════
+
+    // La cámara orbita alrededor del origen usando coordenadas ESFÉRICAS:
+    //   theta (θ) = ángulo horizontal (azimut, izquierda/derecha)
+    //   phi   (φ) = ángulo vertical   (elevación, arriba/abajo)
+    //   radius    = distancia al origen (radio de la órbita)
+
+    let isRightDragging = false; // true cuando el clic derecho está sostenido
+    let lastMouseX = 0;          // posición X del cursor en el frame anterior
+    let lastMouseY = 0;          // posición Y del cursor en el frame anterior
+
+    // Calcular ángulos iniciales a partir de la posición inicial (4, 3, 6) de la cámara
+    let camRadius = Math.sqrt(4*4 + 3*3 + 6*6);           // distancia al origen ≈ 7.81
+    let camTheta  = Math.atan2(4, 6);                      // ángulo horizontal inicial
+    let camPhi    = Math.acos(3 / camRadius);              // ángulo vertical inicial
+
+    const CAM_SENSITIVITY = 0.005; // píxeles de movimiento necesarios para 1 radián de rotación
+
+    // mousedown: detectar cuándo el usuario presiona el botón derecho
+    container.addEventListener('mousedown', e => {
+        if (e.button !== 2) return; // ignorar si no es clic derecho
+        isRightDragging = true;
+        lastMouseX = e.clientX;    // guardar punto de inicio del arrastre
+        lastMouseY = e.clientY;
+        container.classList.add('dragging'); // cambiar cursor a "grabbing"
+    });
+
+    // mousemove: mover la cámara mientras se arrastra con clic derecho
+    // Se escucha en window (no en container) para que funcione aunque el cursor salga del canvas
+    window.addEventListener('mousemove', e => {
+        if (!isRightDragging) return; // solo actuar durante el arrastre
+
+        const dx = e.clientX - lastMouseX; // desplazamiento horizontal del cursor
+        const dy = e.clientY - lastMouseY; // desplazamiento vertical del cursor
+
+        // Actualizar ángulos esféricos según el movimiento del cursor:
+        //   mover el cursor a la derecha (dx > 0) → rotar cámara hacia la derecha (−theta)
+        //   mover el cursor hacia abajo  (dy > 0) → bajar la cámara (+phi)
+        camTheta -= dx * CAM_SENSITIVITY;
+        camPhi   += dy * CAM_SENSITIVITY;
+
+        // Limitar phi para evitar que la cámara pase por encima o debajo del polo
+        // (0.1 rad ≈ 6° desde arriba, Math.PI − 0.1 ≈ 6° desde abajo)
+        camPhi = Math.max(0.1, Math.min(Math.PI - 0.1, camPhi));
+
+        // Convertir coordenadas esféricas (r, θ, φ) → cartesianas (x, y, z):
+        //   x = r · sin(φ) · sin(θ)
+        //   y = r · cos(φ)
+        //   z = r · sin(φ) · cos(θ)
+        camera.position.x = camRadius * Math.sin(camPhi) * Math.sin(camTheta);
+        camera.position.y = camRadius * Math.cos(camPhi);
+        camera.position.z = camRadius * Math.sin(camPhi) * Math.cos(camTheta);
+
+        camera.lookAt(0, 0, 0); // mantener la cámara apuntando al origen
+
+        // Guardar posición actual para calcular el delta en el siguiente evento
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+    });
+
+    // mouseup: terminar el arrastre cuando se suelta el botón derecho
+    window.addEventListener('mouseup', e => {
+        if (e.button !== 2) return;
+        isRightDragging = false;
+        container.classList.remove('dragging'); // restaurar cursor a "grab"
+    });
+
+    // Bloquear el menú contextual del navegador al hacer clic derecho sobre el canvas
+    container.addEventListener('contextmenu', e => e.preventDefault());
+
+
+    // ════════════════════════════════════════════════════
+    // 11. ESCUCHA DE TECLADO
+    // ════════════════════════════════════════════════════
+
+    // keydown: registrar tecla presionada e iluminar su botón en el panel
+    window.addEventListener('keydown', e => {
+        keys[e.code] = true;
+        highlightKey(e.code, true);
+    });
+
+    // keyup: registrar tecla soltada y apagar su botón en el panel
+    window.addEventListener('keyup', e => {
+        keys[e.code] = false;
+        highlightKey(e.code, false);
+    });
+
+    // Relación entre código de tecla y el id del elemento HTML en el panel
+    const keyMap = {
+        'KeyA': 'k-a', 'KeyD': 'k-d', 'KeyW': 'k-w', 'KeyS': 'k-s',
+        'KeyR': 'k-r', 'KeyF': 'k-f',
+        'ArrowLeft': 'k-left', 'ArrowRight': 'k-right',
+        'ArrowUp':   'k-up',   'ArrowDown':  'k-down',
+        'KeyQ': 'k-q', 'KeyE': 'k-e',
+        'KeyZ': 'k-z', 'KeyX': 'k-x'
+    };
+
+    // Ilumina o apaga visualmente el botón del panel que corresponde a la tecla presionada
+    function highlightKey(code, active) {
+        const id = keyMap[code];
+        if (!id) return; // tecla no mapeada, ignorar
+
+        const el = document.getElementById(id);
+        if (!el) return;
+
+        // Clasificar la tecla según qué tipo de transformación controla
+        const translKeys = ['k-a','k-d','k-w','k-s','k-r','k-f']; // traslación → azul
+        const rotKeys    = ['k-left','k-right','k-up','k-down','k-q','k-e']; // rotación → naranja
+        const sclKeys    = ['k-z','k-x']; // escalado → verde
+
+        el.className = 'key'; // resetear todas las clases de estado activo
+
+        if (active) {
+            if      (translKeys.includes(id)) el.classList.add('active-t');
+            else if (rotKeys.includes(id))    el.classList.add('active-r');
+            else if (sclKeys.includes(id))    el.classList.add('active-s');
+        }
+    }
+
+
+    // ════════════════════════════════════════════════════
+    // 12. BOTÓN RESET
+    // ════════════════════════════════════════════════════
+
+    // Devuelve el objeto a su estado original: centro de la escena, sin rotación, tamaño 1
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        mesh.position.set(0, 0, 0); // posición en el origen
+        mesh.rotation.set(0, 0, 0); // sin rotación en ningún eje
+        scale = 1;                  // escala a 100%
+        mesh.scale.set(1, 1, 1);   // aplicar la escala al mesh
+    });
+
+
+    // ════════════════════════════════════════════════════
+    // 13. ACTUALIZACIÓN DE ESTADÍSTICAS
+    // ════════════════════════════════════════════════════
+
+    // Convierte radianes a grados y aplica módulo 360 para mostrar valores legibles
+    const toDeg = r => ((r * 180 / Math.PI) % 360).toFixed(0);
+
+    // Actualiza los valores numéricos del panel con el estado real del objeto en cada frame
+    function updateStats() {
+        document.getElementById('st-px').textContent = mesh.position.x.toFixed(2);
+        document.getElementById('st-py').textContent = mesh.position.y.toFixed(2);
+        document.getElementById('st-pz').textContent = mesh.position.z.toFixed(2);
+        document.getElementById('st-rx').textContent = toDeg(mesh.rotation.x) + '°';
+        document.getElementById('st-ry').textContent = toDeg(mesh.rotation.y) + '°';
+        document.getElementById('st-rz').textContent = toDeg(mesh.rotation.z) + '°';
+        document.getElementById('st-sc').textContent = scale.toFixed(2);
+    }
+
+
+    // ════════════════════════════════════════════════════
+    // 14. CONTADOR DE FPS
+    // ════════════════════════════════════════════════════
+
+    let lastTime = performance.now(); // marca de tiempo del último segundo medido
+    let frames   = 0;                 // frames renderizados en el segundo actual
+    const fpsEl  = document.getElementById('fps-label'); // referencia al HUD de FPS
+
+
+    // ════════════════════════════════════════════════════
+    // 15. REDIMENSIONAMIENTO RESPONSIVO
+    // ════════════════════════════════════════════════════
+
+    // Adaptar cámara y canvas cuando el usuario redimensiona la ventana
+    function onResize() {
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        camera.aspect = w / h;           // recalcular aspecto para no distorsionar
+        camera.updateProjectionMatrix(); // aplicar el nuevo aspecto en la matriz interna
+        renderer.setSize(w, h);          // redimensionar el canvas de WebGL
+    }
+    window.addEventListener('resize', onResize);
+    onResize(); // ejecutar una vez al inicio para establecer el tamaño correcto
+
+
+    // ════════════════════════════════════════════════════
+    // 16. BUCLE DE ANIMACIÓN PRINCIPAL
+    // ════════════════════════════════════════════════════
+
+    let t = 0; // tiempo acumulado para animaciones continuas (orbita de luces, etc.)
+
+    function animate() {
+        // requestAnimationFrame: programa la siguiente llamada sincronizada con el monitor
+        // Típicamente 60 veces por segundo. Es más eficiente que setInterval.
+        requestAnimationFrame(animate);
+
+        t += 0.01; // incrementar el tiempo (≈ 1.0 por segundo a 60fps)
+
+        // ─── TRASLACIÓN: mover la posición del objeto en el espacio ───────────
+        if (keys['KeyA'])  mesh.position.x -= SPEED; // desplazar izquierda (−X)
+        if (keys['KeyD'])  mesh.position.x += SPEED; // desplazar derecha   (+X)
+        if (keys['KeyW'])  mesh.position.z -= SPEED; // desplazar adelante  (−Z)
+        if (keys['KeyS'])  mesh.position.z += SPEED; // desplazar atrás     (+Z)
+        if (keys['KeyR'])  mesh.position.y += SPEED; // desplazar arriba    (+Y)
+        if (keys['KeyF'])  mesh.position.y -= SPEED; // desplazar abajo     (−Y)
+
+        // ─── ROTACIÓN: cambiar la orientación del objeto sobre sus ejes ──────
+        if (keys['ArrowLeft'])  mesh.rotation.y -= ROT_SPD; // girar izquierda sobre Y
+        if (keys['ArrowRight']) mesh.rotation.y += ROT_SPD; // girar derecha   sobre Y
+        if (keys['ArrowUp'])    mesh.rotation.x -= ROT_SPD; // inclinar arriba sobre X
+        if (keys['ArrowDown'])  mesh.rotation.x += ROT_SPD; // inclinar abajo  sobre X
+        if (keys['KeyQ'])       mesh.rotation.z -= ROT_SPD; // rodar antihorario sobre Z
+        if (keys['KeyE'])       mesh.rotation.z += ROT_SPD; // rodar horario    sobre Z
+
+        // ─── ESCALADO: cambiar el tamaño uniforme del objeto ─────────────────
+        if (keys['KeyZ']) scale = Math.min(scale + SCL_SPD, MAX_SCL); // agrandar (máx 4×)
+        if (keys['KeyX']) scale = Math.max(scale - SCL_SPD, MIN_SCL); // achicar  (mín 0.2×)
+        mesh.scale.setScalar(scale); // aplicar escala uniforme en los 3 ejes (X, Y y Z iguales)
+
+        // ─── Animar las luces de color: orbitan alrededor del origen ─────────
+        // Usamos seno y coseno para trazar trayectorias circulares en el plano XZ
+        pointLight1.position.x = Math.sin(t * 0.7) * 5; // órbita a 0.7 radianes/s
+        pointLight1.position.z = Math.cos(t * 0.7) * 5;
+        pointLight2.position.x = Math.cos(t * 0.5) * 4; // órbita más lenta y pequeña
+        pointLight2.position.z = Math.sin(t * 0.5) * 4;
+
+        // ─── Actualizar sombra decorativa para que siga al objeto ────────────
+        shadowBlob.position.x = mesh.position.x;  // misma X que el icosaedro
+        shadowBlob.position.z = mesh.position.z;  // misma Z que el icosaedro
+        shadowBlob.scale.setScalar(scale);         // mismo tamaño que el icosaedro
+        // La opacidad decrece cuanto más alto esté el objeto (efecto sombra realista)
+        const distY = Math.max(0.1, mesh.position.y + 0.01);
+        shadowBlob.material.opacity = 0.08 / (distY * 0.5 + 1);
+
+        // ─── Actualizar panel de estadísticas ────────────────────────────────
+        updateStats();
+
+        // ─── Calcular y mostrar FPS ───────────────────────────────────────────
+        frames++;
+        const now = performance.now();
+        if (now - lastTime >= 1000) {             // cada segundo completo
+            fpsEl.textContent = `FPS: ${frames}`; // mostrar cuántos frames ocurrieron
+            frames   = 0;                         // reiniciar contador de frames
+            lastTime = now;                       // reiniciar marca de tiempo
+        }
+
+        // ─── Renderizar la escena ────────────────────────────────────────────
+        renderer.render(scene, camera); // dibujar el frame actual en el canvas
+    }
+
+    // Iniciar el bucle de animación
+    animate();
+
+</script>
+</body>
+</html>
