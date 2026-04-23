@@ -199,13 +199,11 @@
             transition: box-shadow 0.3s;
         }
 
-        /* Brillo extra cuando la música está sonando */
         #music-player.playing {
             box-shadow: 0 0 40px rgba(157, 0, 255, 0.45);
             border-color: rgba(157, 0, 255, 0.8);
         }
 
-        /* Ícono de nota con animación de rotación */
         #music-icon {
             font-size: 1.3rem;
             display: inline-block;
@@ -221,7 +219,6 @@
             to   { transform: rotate(360deg); }
         }
 
-        /* Nombre de la canción */
         #song-name {
             font-size: 0.6rem;
             color: #ccc;
@@ -233,7 +230,6 @@
             flex: 1;
         }
 
-        /* Botón play / pause circular */
         #play-btn {
             background: transparent;
             border: 1px solid rgba(157, 0, 255, 0.7);
@@ -255,7 +251,27 @@
             box-shadow: 0 0 14px var(--primary-purple);
         }
 
-        /* Slider de volumen */
+        #next-btn {
+            background: transparent;
+            border: 1px solid rgba(157, 0, 255, 0.5);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            transition: background 0.3s, box-shadow 0.3s;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #next-btn:hover {
+            background: var(--primary-purple);
+            box-shadow: 0 0 10px var(--primary-purple);
+        }
+
         #vol-slider {
             width: 64px;
             accent-color: #9d00ff;
@@ -263,23 +279,28 @@
             flex-shrink: 0;
         }
 
-        /* Icono de volumen */
         #vol-icon {
             font-size: 0.8rem;
             color: rgba(157, 0, 255, 0.8);
             flex-shrink: 0;
         }
 
-        /* Barra de progreso de la canción */
+        /* Barra de progreso — ahora es clickeable y más alta al hover */
         #progress-bar-wrap {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
-            height: 3px;
+            height: 5px;
             background: rgba(255,255,255,0.07);
             border-radius: 0 0 18px 18px;
             overflow: hidden;
+            cursor: pointer;
+            transition: height 0.2s;
+        }
+
+        #progress-bar-wrap:hover {
+            height: 8px;
         }
 
         #progress-bar {
@@ -287,6 +308,7 @@
             width: 0%;
             background: linear-gradient(to right, #6a00f4, #9d00ff);
             transition: width 0.5s linear;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -432,8 +454,9 @@
     ═══════════════════════════════════════════ -->
     <div id="music-player">
         <span id="music-icon">🎵</span>
-        <span id="song-name">Presiona ▶ para escuchar</span>
+        <span id="song-name">Cargando...</span>
         <button id="play-btn" onclick="toggleMusic()" title="Play / Pause">▶</button>
+        <button id="next-btn" onclick="nextSong()" title="Siguiente">⏭</button>
         <i class="fas fa-volume-up" id="vol-icon"></i>
         <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.4"
                oninput="setVolume(this.value)" title="Volumen">
@@ -442,16 +465,7 @@
         </div>
     </div>
 
-    <!-- ─── Elemento de audio ───
-         El navegador probará los formatos en orden: MP3 → WAV → FLAC.
-         Cambia el nombre "musica" por el nombre real de tu archivo (sin extensión).
-         Los tres deben tener el mismo nombre base para que funcione correctamente.
-    ─── -->
-<audio id="bg-audio" loop>
-    <source src="assets/audio/TU_NOMBRE_AQUI.mp3"  type="audio/mpeg">
-    <source src="assets/audio/TU_NOMBRE_AQUI.wav"  type="audio/wav">
-    <source src="assets/audio/TU_NOMBRE_AQUI.flac" type="audio/flac">
-</audio>
+    <audio id="bg-audio"></audio>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -459,34 +473,44 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
     <script>
-        // ── Inicializar animaciones AOS ──
         AOS.init({ duration: 1000, once: true });
 
         // ════════════════════════════════════════════════
-        // LÓGICA DEL REPRODUCTOR DE MÚSICA
+        // LISTA DE CANCIONES
+        // Para agregar más: escribe el nombre exacto del
+        // archivo dentro de assets/audio/ con su extensión.
         // ════════════════════════════════════════════════
+        const playlist = [
+            "01. Daddy’s Groove - Stellar (Martin Garrix Remix).wav",
+            "FTampa, The OtherZ, NUZB - Lakers (Extended Mix).mp3",
+            // "otra-cancion.flac",
+        ];
 
-        const audio       = document.getElementById('bg-audio');
-        const playBtn     = document.getElementById('play-btn');
-        const songNameEl  = document.getElementById('song-name');
-        const musicIcon   = document.getElementById('music-icon');
-        const progressBar = document.getElementById('progress-bar');
-        const player      = document.getElementById('music-player');
+        let currentIndex = 0;
 
-        // Volumen inicial (0 = mudo, 1 = máximo)
+        const audio           = document.getElementById('bg-audio');
+        const playBtn         = document.getElementById('play-btn');
+        const songNameEl      = document.getElementById('song-name');
+        const musicIcon       = document.getElementById('music-icon');
+        const progressBar     = document.getElementById('progress-bar');
+        const progressBarWrap = document.getElementById('progress-bar-wrap');
+        const player          = document.getElementById('music-player');
+
         audio.volume = 0.4;
+
+        // ── Cargar canción por índice ──
+        function loadSong(index) {
+            const fileName = playlist[index];
+            audio.src = 'assets/audio/' + encodeURIComponent(fileName);
+            songNameEl.textContent = fileName.replace(/\.[^.]+$/, '');
+            progressBar.style.width = '0%';
+        }
 
         // ── Play / Pause ──
         function toggleMusic() {
             if (audio.paused) {
                 audio.play().then(() => {
                     playBtn.textContent = '⏸';
-
-                    // Leer el nombre del archivo que el navegador eligió reproducir
-                    const src      = audio.currentSrc || audio.src;
-                    const fileName = src.split('/').pop().replace(/\.[^.]+$/, '');
-                    songNameEl.textContent = fileName;
-
                     musicIcon.classList.add('spinning');
                     player.classList.add('playing');
                 }).catch(() => {
@@ -500,6 +524,41 @@
             }
         }
 
+        // ── Siguiente canción ──
+        function nextSong() {
+            currentIndex = (currentIndex + 1) % playlist.length;
+            loadSong(currentIndex);
+            audio.play().then(() => {
+                playBtn.textContent = '⏸';
+                musicIcon.classList.add('spinning');
+                player.classList.add('playing');
+            });
+        }
+
+        // ── Al terminar pasa a la siguiente ──
+        audio.addEventListener('ended', () => {
+            nextSong();
+        });
+
+        // ── Barra de progreso clickeable para adelantar/retroceder ──
+        progressBarWrap.addEventListener('click', (e) => {
+            if (!audio.duration) return;
+            const rect     = progressBarWrap.getBoundingClientRect();
+            const clickX   = e.clientX - rect.left;
+            const pct      = clickX / rect.width;
+            audio.currentTime = pct * audio.duration;
+            progressBar.style.transition = 'none';
+            progressBar.style.width = (pct * 100) + '%';
+            setTimeout(() => progressBar.style.transition = 'width 0.5s linear', 50);
+        });
+
+        // ── Actualizar barra de progreso ──
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
+            }
+        });
+
         // ── Control de volumen ──
         function setVolume(val) {
             audio.volume = val;
@@ -509,23 +568,9 @@
             else                icon.className = 'fas fa-volume-up';
         }
 
-        // ── Actualizar barra de progreso cada segundo ──
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                const pct = (audio.currentTime / audio.duration) * 100;
-                progressBar.style.width = pct + '%';
-            }
-        });
-
-        // ── Cuando termina la canción (si se quita el loop) ──
-        audio.addEventListener('ended', () => {
-            playBtn.textContent = '▶';
-            musicIcon.classList.remove('spinning');
-            player.classList.remove('playing');
-            progressBar.style.width = '0%';
-            songNameEl.textContent = 'Presiona ▶ para escuchar';
-        });
+        // ── Cargar la primera canción al iniciar ──
+        loadSong(currentIndex);
     </script>
 
 </body>
-</html>             
+</html>
