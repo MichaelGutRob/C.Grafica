@@ -9,11 +9,19 @@
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Google Fonts: Orbitron (Futurista) e Inter -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
+        rel="stylesheet">
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- AOS Animaciones -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap"
+        rel="stylesheet">
 
     <style>
         :root {
@@ -31,7 +39,10 @@
             overflow-x: hidden;
         }
 
-        h1, h2, h3, .nav-link {
+        h1,
+        h2,
+        h3,
+        .nav-link {
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 2px;
         }
@@ -39,15 +50,18 @@
         /* --- Fondo Animado --- */
         .bg-gradient-blur {
             position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             background: radial-gradient(circle at 50% 50%, #1a0033 0%, #050505 100%);
             z-index: -1;
         }
 
         .neon-circle {
             position: absolute;
-            width: 400px; height: 400px;
+            width: 400px;
+            height: 400px;
             background: var(--primary-purple);
             filter: blur(180px);
             opacity: 0.15;
@@ -146,9 +160,18 @@
         }
 
         /* --- Custom Scrollbar --- */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: var(--dark-bg); }
-        ::-webkit-scrollbar-thumb { background: var(--secondary-purple); border-radius: 10px; }
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--dark-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--secondary-purple);
+            border-radius: 10px;
+        }
 
         /* --- Imagen de cards uniforme --- */
         .card-img-top {
@@ -215,8 +238,13 @@
         }
 
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to   { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+
+            to {
+                transform: rotate(360deg);
+            }
         }
 
         #song-name {
@@ -292,7 +320,7 @@
             left: 0;
             width: 100%;
             height: 5px;
-            background: rgba(255,255,255,0.07);
+            background: rgba(255, 255, 255, 0.07);
             border-radius: 0 0 18px 18px;
             overflow: hidden;
             cursor: pointer;
@@ -342,10 +370,12 @@
     <section id="universidad" class="py-5" style="padding-top: 100px !important;">
         <div class="container">
 
-            <h2 class="display-6 mb-4" data-aos="fade-up">UNIVERSIDAD</h2>
+            <h2 class="display-6 mb-4" data-aos="fade-up" style="font-family: 'Playfair Display', serif;">UNIVERSIDAD</h2>
 
             <!-- Primera fila: ejercicios 2D / DOM -->
             <div class="row g-4">
+
+                <h2 class="display-10 mb-2" data-aos="fade-up" style="font-family: 'Playfair Display', serif;">Ejercicios 2D</h2>
 
                 <!-- Trabajo 1 -->
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
@@ -391,7 +421,7 @@
             <!-- Segunda fila: ejercicios 3D -->
             <div class="row g-4 mt-2">
 
-                <h2 class="display-10 mb-2" data-aos="fade-up">Ejercicios 3D</h2>
+                <h2 class="display-10 mb-2" data-aos="fade-up" style="font-family: 'Playfair Display', serif;">Ejercicios 3D</h2>
 
                 <!-- Trabajo 4 -->
                 <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
@@ -426,7 +456,8 @@
                             <img src="assets/img/ejercicios_3_3d.png" class="card-img-top" alt="Proyecto 6">
                             <div class="card-body">
                                 <h5 class="card-title">Ejercicio 3</h5>
-                                <p class="card-text">Aplicación integrada de traslación, rotación y escalado en un objeto tridimensional</p>
+                                <p class="card-text">Aplicación integrada de traslación, rotación y escalado en un
+                                    objeto tridimensional</p>
                             </div>
                         </div>
                     </a>
@@ -445,7 +476,8 @@
                 <a href="#" class="text-white fs-4"><i class="fab fa-linkedin"></i></a>
                 <a href="#" class="text-white fs-4"><i class="fab fa-twitter"></i></a>
             </div>
-            <p class="text-secondary small">&copy; 2023 | Hecho con <i class="fas fa-heart text-white"></i> por TuNombre</p>
+            <p class="text-secondary small">&copy; 2023 | Hecho con <i class="fas fa-heart text-white"></i> por TuNombre
+            </p>
         </div>
     </footer>
 
@@ -458,8 +490,8 @@
         <button id="play-btn" onclick="toggleMusic()" title="Play / Pause">▶</button>
         <button id="next-btn" onclick="nextSong()" title="Siguiente">⏭</button>
         <i class="fas fa-volume-up" id="vol-icon"></i>
-        <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.4"
-               oninput="setVolume(this.value)" title="Volumen">
+        <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.4" oninput="setVolume(this.value)"
+            title="Volumen">
         <div id="progress-bar-wrap">
             <div id="progress-bar"></div>
         </div>
@@ -488,13 +520,13 @@
 
         let currentIndex = 0;
 
-        const audio           = document.getElementById('bg-audio');
-        const playBtn         = document.getElementById('play-btn');
-        const songNameEl      = document.getElementById('song-name');
-        const musicIcon       = document.getElementById('music-icon');
-        const progressBar     = document.getElementById('progress-bar');
+        const audio = document.getElementById('bg-audio');
+        const playBtn = document.getElementById('play-btn');
+        const songNameEl = document.getElementById('song-name');
+        const musicIcon = document.getElementById('music-icon');
+        const progressBar = document.getElementById('progress-bar');
         const progressBarWrap = document.getElementById('progress-bar-wrap');
-        const player          = document.getElementById('music-player');
+        const player = document.getElementById('music-player');
 
         audio.volume = 0.4;
 
@@ -543,9 +575,9 @@
         // ── Barra de progreso clickeable para adelantar/retroceder ──
         progressBarWrap.addEventListener('click', (e) => {
             if (!audio.duration) return;
-            const rect     = progressBarWrap.getBoundingClientRect();
-            const clickX   = e.clientX - rect.left;
-            const pct      = clickX / rect.width;
+            const rect = progressBarWrap.getBoundingClientRect();
+            const clickX = e.clientX - rect.left;
+            const pct = clickX / rect.width;
             audio.currentTime = pct * audio.duration;
             progressBar.style.transition = 'none';
             progressBar.style.width = (pct * 100) + '%';
@@ -563,9 +595,9 @@
         function setVolume(val) {
             audio.volume = val;
             const icon = document.getElementById('vol-icon');
-            if (val == 0)       icon.className = 'fas fa-volume-mute';
+            if (val == 0) icon.className = 'fas fa-volume-mute';
             else if (val < 0.5) icon.className = 'fas fa-volume-down';
-            else                icon.className = 'fas fa-volume-up';
+            else icon.className = 'fas fa-volume-up';
         }
 
         // ── Cargar la primera canción al iniciar ──
@@ -573,4 +605,5 @@
     </script>
 
 </body>
+
 </html>
