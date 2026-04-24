@@ -1,55 +1,119 @@
 
-<style>
-  canvas { display: block; border-radius: var(--border-radius-lg); background: #0d1117; }
-  .controls { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 12px; align-items: center; }
-  .btn { padding: 7px 16px; border-radius: var(--border-radius-md); border: 0.5px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); font-size: 13px; cursor: pointer; transition: background .15s; }
-  .btn:hover { background: var(--color-background-secondary); }
-  .btn.active { background: var(--color-background-info); color: var(--color-text-info); border-color: transparent; }
-  .slider-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--color-text-secondary); }
-  .label-row { display: flex; gap: 16px; font-size: 12px; color: var(--color-text-secondary); align-items: center; flex-wrap: wrap; margin-top: 10px; }
-  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
-</style>
+<h2 class="sr-only">Simulación interactiva de rotación 3D de un cubo en los ejes X e Y usando Canvas 2D y proyección en perspectiva</h2>
 
-<canvas id="c" width="680" height="380"></canvas>
+<div style="padding:1rem 0;display:flex;flex-direction:column;gap:16px;">
 
-<div class="controls">
-  <button class="btn active" id="btn-x" onclick="setMode('x')">Eje X — arriba/abajo</button>
-  <button class="btn" id="btn-y" onclick="setMode('y')">Eje Y — izq/der</button>
-  <button class="btn" id="btn-xy" onclick="setMode('xy')">Ejes X + Y</button>
-  <button class="btn" id="btn-pause" onclick="togglePause()">⏸ Pausar</button>
-  <div class="slider-row">
-    <span>Velocidad</span>
-    <input type="range" min="1" max="5" value="2" step="1" id="speed-slider" style="width:90px" oninput="setSpeed(this.value)">
-    <span id="speed-val">2×</span>
+  <div style="display:flex;flex-direction:column;gap:4px;">
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0;font-weight:500;text-transform:uppercase;letter-spacing:0.05em;">Simulación 3D</p>
+    <p style="font-size:22px;font-weight:500;margin:0;color:var(--color-text-primary);">Rotación de un cubo en los ejes X e Y</p>
   </div>
-</div>
 
-<div class="label-row">
-  <span><span class="dot" style="background:#ff6b6b"></span>Eje X → gira arriba/abajo</span>
-  <span><span class="dot" style="background:#6bffb8"></span>Eje Y → gira izq/der</span>
-  <span><span class="dot" style="background:#6bb5ff"></span>Eje Z</span>
-  <span style="margin-left:auto; font-size:11px" id="info-text">Eje X: rotación arriba/abajo</span>
+  <div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:16px;align-items:start;">
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+
+      <canvas id="c" width="680" height="340" style="display:block;width:100%;border-radius:var(--border-radius-lg);background:#0d1117;border:0.5px solid var(--color-border-tertiary);"></canvas>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <button id="btn-x" onclick="setMode('x')" style="font-size:13px;padding:6px 14px;background:var(--color-background-info);color:var(--color-text-info);border:0.5px solid transparent;border-radius:var(--border-radius-md);cursor:pointer;">Eje X</button>
+        <button id="btn-y" onclick="setMode('y')" style="font-size:13px;padding:6px 14px;border-radius:var(--border-radius-md);cursor:pointer;">Eje Y</button>
+        <button id="btn-xy" onclick="setMode('xy')" style="font-size:13px;padding:6px 14px;border-radius:var(--border-radius-md);cursor:pointer;">Ejes X + Y</button>
+        <button id="btn-pause" onclick="togglePause()" style="font-size:13px;padding:6px 14px;border-radius:var(--border-radius-md);cursor:pointer;">⏸ Pausar</button>
+        <span style="font-size:12px;color:var(--color-text-secondary);">Velocidad</span>
+        <input type="range" min="1" max="5" value="2" step="1" id="speed-slider" style="width:80px;" oninput="setSpeed(this.value)">
+        <span id="speed-val" style="font-size:13px;font-weight:500;min-width:20px;">2×</span>
+      </div>
+
+      <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--color-text-secondary);align-items:center;">
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#ff6b6b;display:inline-block;"></span>Eje X — arriba/abajo</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#6bffb8;display:inline-block;"></span>Eje Y — izq/der</span>
+        <span style="display:flex;align-items:center;gap:5px;"><span style="width:10px;height:10px;border-radius:50%;background:#6bb5ff;display:inline-block;"></span>Eje Z</span>
+        <span id="info-text" style="margin-left:auto;font-size:11px;color:var(--color-text-secondary);">Eje X: rotación arriba/abajo</span>
+      </div>
+
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+
+      <p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:0;">Tecnologías utilizadas</p>
+
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem 1rem;border-left:3px solid #7F77DD;border-top-left-radius:0;border-bottom-left-radius:0;">
+        <p style="font-size:13px;font-weight:500;margin:0 0 3px;color:var(--color-text-primary);">Canvas 2D API</p>
+        <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Dibuja cada frame del cubo directamente sobre un elemento &lt;canvas&gt; usando el contexto 2d del navegador.</p>
+      </div>
+
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem 1rem;border-left:3px solid #378ADD;border-top-left-radius:0;border-bottom-left-radius:0;">
+        <p style="font-size:13px;font-weight:500;margin:0 0 3px;color:var(--color-text-primary);">requestAnimationFrame</p>
+        <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Loop de animación nativo del navegador. Ejecuta la función <code style="font-size:11px;">loop()</code> ~60 veces por segundo sincronizado con la pantalla.</p>
+      </div>
+
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem 1rem;border-left:3px solid #1D9E75;border-top-left-radius:0;border-bottom-left-radius:0;">
+        <p style="font-size:13px;font-weight:500;margin:0 0 3px;color:var(--color-text-primary);">Proyección en perspectiva</p>
+        <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Convierte coordenadas 3D (X, Y, Z) a coordenadas 2D de pantalla dividiendo por la profundidad Z. Da la sensación de lejanía.</p>
+      </div>
+
+      <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem 1rem;border-left:3px solid #D85A30;border-top-left-radius:0;border-bottom-left-radius:0;">
+        <p style="font-size:13px;font-weight:500;margin:0 0 3px;color:var(--color-text-primary);">Matrices de rotación</p>
+        <p style="font-size:12px;color:var(--color-text-secondary);margin:0;line-height:1.6;">Funciones <code style="font-size:11px;">rotX()</code> y <code style="font-size:11px;">rotY()</code> que aplican seno y coseno para girar cada vértice del cubo en el espacio 3D.</p>
+      </div>
+
+      <p style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin:4px 0 0;">Conceptos aplicados</p>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem;">
+          <p style="font-size:12px;font-weight:500;margin:0 0 2px;color:var(--color-text-primary);">8 vértices</p>
+          <p style="font-size:11px;color:var(--color-text-secondary);margin:0;line-height:1.5;">Definen los 8 puntos del cubo en el espacio 3D</p>
+        </div>
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem;">
+          <p style="font-size:12px;font-weight:500;margin:0 0 2px;color:var(--color-text-primary);">6 caras</p>
+          <p style="font-size:11px;color:var(--color-text-secondary);margin:0;line-height:1.5;">Ordenadas por profundidad para pintar de atrás hacia adelante</p>
+        </div>
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem;">
+          <p style="font-size:12px;font-weight:500;margin:0 0 2px;color:var(--color-text-primary);">Painter's algorithm</p>
+          <p style="font-size:11px;color:var(--color-text-secondary);margin:0;line-height:1.5;">Ordena caras por profundidad Z para evitar solapamientos</p>
+        </div>
+        <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.75rem;">
+          <p style="font-size:12px;font-weight:500;margin:0 0 2px;color:var(--color-text-primary);">Delta time (dt)</p>
+          <p style="font-size:11px;color:var(--color-text-secondary);margin:0;line-height:1.5;">Suaviza la velocidad independiente del fps de la pantalla</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
 </div>
 
 <script>
 const cv = document.getElementById('c');
 const ctx = cv.getContext('2d');
-const W = 680, H = 380, CX = W/2, CY = H/2;
+let W, H, CX, CY;
+
+function resize() {
+  W = cv.clientWidth;
+  H = Math.round(W * 340/680);
+  cv.width = W;
+  cv.height = H;
+  CX = W/2; CY = H/2;
+}
+resize();
+window.addEventListener('resize', resize);
 
 let mode = 'x', paused = false, speed = 2;
-let rx = 0, ry = 0;
-let lastTime = null;
+let rx = 0, ry = 0, lastTime = null;
 
 const msgs = {
-  x:  'Eje X: rotación arriba/abajo',
-  y:  'Eje Y: rotación izquierda/derecha',
+  x: 'Eje X: rotación arriba/abajo',
+  y: 'Eje Y: rotación izquierda/derecha',
   xy: 'Ejes X + Y simultáneamente'
 };
 
+const activeStyle = 'font-size:13px;padding:6px 14px;background:var(--color-background-info);color:var(--color-text-info);border:0.5px solid transparent;border-radius:var(--border-radius-md);cursor:pointer;';
+const inactiveStyle = 'font-size:13px;padding:6px 14px;border-radius:var(--border-radius-md);cursor:pointer;';
+
 function setMode(m) {
   mode = m;
-  ['x','y','xy'].forEach(k => document.getElementById('btn-'+k).classList.remove('active'));
-  document.getElementById('btn-'+m).classList.add('active');
+  ['x','y','xy'].forEach(k => {
+    document.getElementById('btn-'+k).style.cssText = k === m ? activeStyle : inactiveStyle;
+  });
   document.getElementById('info-text').textContent = msgs[m];
 }
 function togglePause() {
@@ -64,7 +128,7 @@ function setSpeed(v) {
 
 const verts = [
   [-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],
-  [-1,-1, 1],[1,-1, 1],[1,1, 1],[-1,1, 1]
+  [-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]
 ];
 const faces = [
   [0,1,2,3],[4,5,6,7],[0,1,5,4],
@@ -72,34 +136,26 @@ const faces = [
 ];
 const faceColors = ['#1a3a5c','#1a4a3a','#3a1a1a','#2a2a4a','#3a2a1a','#2a3a3a'];
 
-// Eje X: gira arriba y abajo (afecta Y y Z)
 function rotX(v, a) {
   const [x,y,z] = v, c=Math.cos(a), s=Math.sin(a);
   return [x, y*c - z*s, y*s + z*c];
 }
-// Eje Y: gira izquierda y derecha (afecta X y Z)
 function rotY(v, a) {
   const [x,y,z] = v, c=Math.cos(a), s=Math.sin(a);
   return [x*c + z*s, y, -x*s + z*c];
 }
-
 function project(v) {
-  const fov = 4.5, scale = 110;
+  const fov = 4.5, scale = Math.min(W, H) * 0.28;
   const z = v[2] + fov;
   return [CX + (v[0]/z)*scale*fov, CY + (v[1]/z)*scale*fov];
 }
 
 function drawCube(rx2, ry2) {
-  let pts = verts.map(v => {
-    let p = rotX(v, rx2);
-    return rotY(p, ry2);
-  });
-
+  let pts = verts.map(v => rotY(rotX(v, rx2), ry2));
   const sorted = faces.map((f,i) => ({
     f, i, depth: f.reduce((s,j) => s + pts[j][2], 0)/4
   })).sort((a,b) => a.depth - b.depth);
-
-  sorted.forEach(({f, i}) => {
+  sorted.forEach(({f,i}) => {
     const proj = f.map(j => project(pts[j]));
     ctx.beginPath();
     ctx.moveTo(proj[0][0], proj[0][1]);
@@ -117,10 +173,8 @@ function drawAxes(rx2, ry2) {
   const axes = [[1,0,0],[0,1,0],[0,0,1]];
   const colors = ['#ff6b6b','#6bffb8','#6bb5ff'];
   const labels = ['X','Y','Z'];
-
-  axes.forEach((d, i) => {
-    let p = rotX(d, rx2);
-    p = rotY(p, ry2);
+  axes.forEach((d,i) => {
+    let p = rotY(rotX(d, rx2), ry2);
     const scale = 1.5;
     const p1 = project(p.map(v => v * -scale));
     const p2 = project(p.map(v => v * scale));
@@ -140,26 +194,11 @@ function drawAxes(rx2, ry2) {
 }
 
 function drawGrid() {
+  const step = Math.round(W / 17);
   ctx.strokeStyle = 'rgba(80,100,130,0.15)';
   ctx.lineWidth = 0.5;
-  for(let x=0; x<=W; x+=40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
-  for(let y=0; y<=H; y+=40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
-}
-
-function drawArrowHint() {
-  ctx.save();
-  ctx.font = '11px monospace';
-  ctx.textAlign = 'left';
-
-  if (mode === 'x' || mode === 'xy') {
-    ctx.fillStyle = 'rgba(255,107,107,0.7)';
-    ctx.fillText('↕  Eje X', 14, 22);
-  }
-  if (mode === 'y' || mode === 'xy') {
-    ctx.fillStyle = 'rgba(107,255,184,0.7)';
-    ctx.fillText('↔  Eje Y', 14, mode === 'xy' ? 38 : 22);
-  }
-  ctx.restore();
+  for(let x=0; x<=W; x+=step) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  for(let y=0; y<=H; y+=step) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
 }
 
 function loop(ts) {
@@ -167,25 +206,19 @@ function loop(ts) {
   if (!lastTime) lastTime = ts;
   const dt = Math.min((ts - lastTime) / 1000, 0.05);
   lastTime = ts;
-
   const base = 0.7 * speed;
-  if (mode === 'x'  || mode === 'xy') rx += base * dt;
-  if (mode === 'y'  || mode === 'xy') ry += base * dt;
-
+  if (mode === 'x' || mode === 'xy') rx += base * dt;
+  if (mode === 'y' || mode === 'xy') ry += base * dt;
   ctx.clearRect(0,0,W,H);
   drawGrid();
   drawAxes(rx, ry);
   drawCube(rx, ry);
-  drawArrowHint();
-
   const deg = n => (((n * 180/Math.PI) % 360 + 360) % 360).toFixed(0);
   ctx.fillStyle = 'rgba(180,210,255,0.45)';
   ctx.font = '11px monospace';
   ctx.textAlign = 'left';
-  ctx.fillText(`RX: ${deg(rx)}°   RY: ${deg(ry)}°`, 14, H - 14);
-
+  ctx.fillText('RX: ' + deg(rx) + '   RY: ' + deg(ry) + '°', 14, H - 14);
   requestAnimationFrame(loop);
 }
-
 requestAnimationFrame(loop);
 </script>
