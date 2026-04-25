@@ -1,0 +1,17 @@
+{
+  "name": "c-grafica",
+  "version": "1.0.0",
+  "description": "Portfolio de Michael",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "dependencies": {
+    "culori": "^4.0.2",
+    "three": "^0.172.0"
+  },
+  "devDependencies": {
+    "vite": "^6.3.3"
+  }
+}

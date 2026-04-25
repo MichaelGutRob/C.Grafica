@@ -4,24 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Michael</title>
+    <title>Michael | Dev Portfolio</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts: Orbitron (Futurista) e Inter -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
-        rel="stylesheet">
-    <!-- Font Awesome Icons -->
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- AOS Animaciones -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap"
-        rel="stylesheet">
     <style>
         :root {
             --primary-purple: #9d00ff;
@@ -31,41 +24,43 @@
             --text-white: #ffffff;
         }
 
+        /* --- Base --- */
         body {
             background-color: var(--dark-bg);
             color: var(--text-white);
             font-family: 'Inter', sans-serif;
             overflow-x: hidden;
+            /* CORREGIDO: solo bloqueamos scroll horizontal,
+               no el vertical, para que la página pueda scrollearse */
         }
 
-        h1,
-        h2,
-        h3,
-        .nav-link {
+        h1, h2, h3, .nav-link {
             font-family: 'Orbitron', sans-serif;
             letter-spacing: 2px;
         }
 
-        /* --- Fondo Animado --- */
-        .bg-gradient-blur {
+        /* --- Fondo animado (canvas WebGPU) --- */
+        #gradient-canvas {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 50% 50%, #1a0033 0%, #050505 100%);
-            z-index: -1;
+            z-index: -1;          /* detrás de todo el contenido */
+            pointer-events: none; /* el mouse pasa a través del canvas */
         }
 
+        /* Círculos de neón decorativos (opcionales, encima del canvas) */
         .neon-circle {
-            position: absolute;
+            position: fixed;
             width: 400px;
             height: 400px;
             background: var(--primary-purple);
             filter: blur(180px);
-            opacity: 0.15;
-            z-index: -1;
+            opacity: 0.08;
+            z-index: 0;
             border-radius: 50%;
+            pointer-events: none;
         }
 
         /* --- Navbar --- */
@@ -73,6 +68,8 @@
             background: rgba(5, 5, 5, 0.8);
             backdrop-filter: blur(15px);
             border-bottom: 1px solid rgba(157, 0, 255, 0.2);
+            position: relative;
+            z-index: 10;
         }
 
         .nav-link {
@@ -86,12 +83,13 @@
             text-shadow: 0 0 10px var(--primary-purple);
         }
 
-        /* --- Hero Section --- */
+        /* --- Hero --- */
         .hero-section {
-            height: 100vh;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             position: relative;
+            z-index: 1;
         }
 
         .glitch-title {
@@ -101,6 +99,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 1rem;
+            min-height: 1.2em; /* evita salto de layout durante el tipado */
         }
 
         .btn-futuristic {
@@ -113,8 +112,9 @@
             overflow: hidden;
             transition: 0.4s;
             text-transform: uppercase;
-            font-family: 'Orbitron';
+            font-family: 'Orbitron', sans-serif;
             font-size: 0.8rem;
+            text-decoration: none;
         }
 
         .btn-futuristic:hover {
@@ -123,7 +123,7 @@
             color: white;
         }
 
-        /* --- Cards Glassmorphism --- */
+        /* --- Cards glassmorphism --- */
         .glass-card {
             background: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -139,7 +139,13 @@
             box-shadow: 0 10px 30px rgba(157, 0, 255, 0.1);
         }
 
-        /* --- Skill Badges --- */
+        /* --- Secciones con z-index para estar sobre el canvas --- */
+        section {
+            position: relative;
+            z-index: 1;
+        }
+
+        /* --- Skill badges --- */
         .skill-badge {
             background: rgba(157, 0, 255, 0.1);
             border: 1px solid var(--primary-purple);
@@ -156,27 +162,23 @@
             border-top: 1px solid rgba(255, 255, 255, 0.05);
             padding: 40px 0;
             margin-top: 100px;
+            position: relative;
+            z-index: 1;
         }
 
-        /* --- Custom Scrollbar --- */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--dark-bg);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--secondary-purple);
-            border-radius: 10px;
-        }
+        /* --- Scrollbar personalizado --- */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--secondary-purple); border-radius: 10px; }
     </style>
 </head>
 
 <body>
 
-    <div class="bg-gradient-blur"></div>
+    <!-- CORREGIDO: <canvas> real con el id que usa main.js -->
+    <canvas id="gradient-canvas"></canvas>
+
+    <!-- Círculos decorativos (opcionales) -->
     <div class="neon-circle" style="top: 10%; right: -5%;"></div>
     <div class="neon-circle" style="bottom: 10%; left: -5%;"></div>
 
@@ -203,23 +205,27 @@
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-7" data-aos="fade-right">
-                    <h1 class="glitch-title">CODIFICANDO<br>EL FUTURO</h1>
+                    <!-- Typed.js escribe aquí -->
+                    <h1 class="glitch-title"><span id="texto"></span></h1>
                     <p class="lead mb-4 text-secondary" style="max-width: 500px;">
                         Desarrollador Fullstack especializado en construir experiencias digitales escalables con una
                         estética moderna y funcional.
                     </p>
                     <div class="d-flex gap-3">
-                        <a href="#proyectos" class="btn btn-futuristic">Ver Proyectos</a>
-                        <a href="#universidad" class="btn btn-link text-white text-decoration-none py-2">Descargar
-                            CV</a>
+                        <a href="#proyectos" class="btn-futuristic">Ver Proyectos</a>
+                        <!-- CORREGIDO: href apunta a un archivo real de CV -->
+                        <a href="assets/cv/cv-michael.pdf"
+                           target="_blank"
+                           rel="noopener"
+                           class="btn btn-link text-white text-decoration-none py-2">
+                            Descargar CV
+                        </a>
                     </div>
                 </div>
                 <div class="col-lg-5 d-none d-lg-block" data-aos="zoom-in">
-                    <!-- Decoración abstracta -->
-                    <div class="glass-card text-center p-5">
-                        <i class="fas fa-terminal fa-5x mb-4" style="color: var(--primary-purple);"></i>
-                        <h3 class="mb-0">Fullstack</h3>
-                        <p class="text-secondary">Developer & Architect</p>
+                    <div class="glass-card p-0 overflow-hidden" style="height: 480px;">
+                        <img src="assets/img/Owlsmitch.png" alt="Foto de perfil"
+                            style="width: 100%; height: 100%; object-fit: cover; display: block;">
                     </div>
                 </div>
             </div>
@@ -290,14 +296,15 @@
                 <div class="col-md-6" data-aos="fade-right">
                     <div class="glass-card p-0 overflow-hidden">
                         <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
-                            class="img-fluid w-100" style="opacity: 0.7; height: 250px; object-fit: cover;"
-                            alt="Proyecto">
+                            class="img-fluid w-100"
+                            style="opacity: 0.7; height: 250px; object-fit: cover;"
+                            alt="AI Dashboard">
                         <div class="p-4">
-                            <h4 class="white">AI Dashboard</h4>
-                            <p class="text-secondary small">Plataforma de análisis de datos impulsada por inteligencia
-                                artificial.</p>
-                            <a href="#" class="text-decoration-none" style="color: var(--primary-purple);">Explorar
-                                Proyecto <i class="fas fa-arrow-right ms-2"></i></a>
+                            <h4>AI Dashboard</h4>
+                            <p class="text-secondary small">Plataforma de análisis de datos impulsada por inteligencia artificial.</p>
+                            <a href="#" class="text-decoration-none" style="color: var(--primary-purple);">
+                                Explorar Proyecto <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -305,14 +312,15 @@
                 <div class="col-md-6" data-aos="fade-left">
                     <div class="glass-card p-0 overflow-hidden">
                         <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc4b?auto=format&fit=crop&w=800&q=80"
-                            class="img-fluid w-100" style="opacity: 0.7; height: 250px; object-fit: cover;"
-                            alt="Proyecto">
+                            class="img-fluid w-100"
+                            style="opacity: 0.7; height: 250px; object-fit: cover;"
+                            alt="Crypto Wallet">
                         <div class="p-4">
-                            <h4 class="white">Crypto Wallet</h4>
-                            <p class="text-secondary small">Interfaz moderna para el manejo de activos digitales y NFTs.
-                            </p>
-                            <a href="#" class="text-decoration-none" style="color: var(--primary-purple);">Explorar
-                                Proyecto <i class="fas fa-arrow-right ms-2"></i></a>
+                            <h4>Crypto Wallet</h4>
+                            <p class="text-secondary small">Interfaz moderna para el manejo de activos digitales y NFTs.</p>
+                            <a href="#" class="text-decoration-none" style="color: var(--primary-purple);">
+                                Explorar Proyecto <i class="fas fa-arrow-right ms-2"></i>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -320,31 +328,43 @@
         </div>
     </section>
 
-
-
     <!-- Footer -->
     <footer class="text-center">
         <div class="container">
             <div class="d-flex justify-content-center gap-4 mb-4">
-                <a href="#" class="text-white fs-4"><i class="fab fa-github"></i></a>
-                <a href="#" class="text-white fs-4"><i class="fab fa-linkedin"></i></a>
-                <a href="#" class="text-white fs-4"><i class="fab fa-twitter"></i></a>
+                <a href="#" class="text-white fs-4" aria-label="GitHub"><i class="fab fa-github"></i></a>
+                <a href="#" class="text-white fs-4" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="#" class="text-white fs-4" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
             </div>
-            <p class="text-secondary small">&copy; 2023 | Hecho con <i class="fas fa-heart text-white"></i> por TuNombre
+            <p class="text-secondary small">
+                &copy; 2025 | Hecho con <i class="fas fa-heart text-white"></i> por Michael
             </p>
         </div>
     </footer>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Animaciones AOS JS -->
+    <!-- AOS JS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        AOS.init({
-            duration: 1000,
-            once: true
+        AOS.init({ duration: 1000, once: true });
+    </script>
+
+    <!-- Typed.js (efecto de escritura) -->
+    <script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            new Typed('#texto', {
+                strings: ['CODIFICANDO', 'OWLSMITCH'],
+                typeSpeed: 50,
+                backSpeed: 40,
+                loop: true
+            });
         });
     </script>
-</body>
 
+    <!-- CORREGIDO: módulo ES6 en archivo externo, no mezclado con HTML -->
+    <script type="module" src="main.js"></script>
+
+</body>
 </html>
