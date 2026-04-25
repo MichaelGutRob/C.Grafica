@@ -581,7 +581,7 @@
         });
         const floor = new THREE.Mesh(floorGeo, floorMat);
 
-        // Rotar −90° en X (−π/2 radianes) para que el plano quede horizontal
+        // Rotar −90° en X  para que el plano quede horizontal
         floor.rotation.x = -Math.PI / 2;
 
         // Ligeramente por debajo de y=0 para que la grilla quede visible encima
@@ -602,6 +602,11 @@
         // BLOQUE 6 — OBJETO PRINCIPAL: ICOSAEDRO
         const geo = new THREE.IcosahedronGeometry(0.9, 1);
 
+        // ALTERNATIVAS
+        
+        // const geo = new THREE.CylinderGeometry(1, 1, 1, 6); // alternativa: cilindro hexagonal (prisma triangular)   HEXAGONAL 
+        // const geo = new THREE.BoxGeometry(1, 1, 1); // alternativa: CUBO
+        // const geo = new THREE.CylinderGeometry(1, 1, 1, 3); // alternativa: cilindro triangular (prisma triangular) TRIANGULAR
         const mat = new THREE.MeshStandardMaterial({
             color: 0x1a3a6a,
             emissive: 0x001a33,
@@ -688,8 +693,6 @@
 
 
         // BLOQUE 10 — CÁMARA ORBITAL CON CLIC DERECHO
-
-
         let isRightDragging = false;  // true mientras el botón derecho esté presionado
         let lastMouseX = 0;            // posición X del cursor en el evento anterior
         let lastMouseY = 0;            // posición Y del cursor en el evento anterior
@@ -811,7 +814,6 @@
         }
 
         // BLOQUE 12 — BOTÓN RESET
-
         document.getElementById('reset-btn').addEventListener('click', () => {
             mesh.position.set(0, 0, 0);   // resetear posición
             mesh.rotation.set(0, 0, 0);   // resetear rotación (en radianes)
