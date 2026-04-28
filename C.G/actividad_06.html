@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Visor de PDF tipo Scribd</title>
+
+  <!-- Librería PDF.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+    }
+
+    .container {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* VISOR */
+    .viewer {
+      flex: 3;
+      background: #222;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: auto;
+    }
+
+    canvas {
+      box-shadow: 0 0 10px rgba(0,0,0,0.5);
+    }
+
+    /* PANEL LATERAL */
+    .sidebar {
+      flex: 1;
+      background: white;
+      padding: 20px;
+      border-left: 2px solid #ddd;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .sidebar h2 {
+      margin: 0;
+      color: #0E4775;
+    }
+
+    .info {
+      font-size: 14px;
+      color: #555;
+    }
+
+    .btn-download {
+      margin-top: auto;
+      padding: 12px;
+      background: #0E4775;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+
+    .btn-download:hover {
+      background: #083354;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="container">
+
+  <!-- VISOR PDF -->
+  <div class="viewer">
+    <canvas id="pdf-render"></canvas>
+  </div>
+
+  <!-- PANEL INFO -->
+  <div class="sidebar">
+    <h2>Mi Documento PDF</h2>
+
+    <div class="info">
+      <p><strong>Autor:</strong> Michael</p>
+      <p><strong>Fecha:</strong> 2026</p>
+      <p><strong>Tamaño:</strong> 2.4 MB</p>
+      <p><strong>Descripción:</strong> Documento de ejemplo con visor tipo repositorio.</p>
+    </div>
+
+    <button class="btn-download" onclick="descargarPDF()">
+      Descargar PDF
+    </button>
+  </div>
+
+</div>
+
+<script>
+  const url = "archivo.pdf"; // CAMBIA AQUÍ TU PDF
+
+  let pdfDoc = null;
+  let pageNum = 1;
+  let canvas = document.getElementById("pdf-render");
+  let ctx = canvas.getContext("2d");
+
+  pdfjsLib.getDocument(url).promise.then(pdf => {
+    pdfDoc = pdf;
+    renderPage(pageNum);
+  });
+
+  function renderPage(num) {
+    pdfDoc.getPage(num).then(page => {
+      const viewport = page.getViewport({ scale: 1.5 });
+
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+
+      const renderCtx = {
+        canvasContext: ctx,
+        viewport: viewport
+      };
+
+      page.render(renderCtx);
+    });
+  }
+
+  function descargarPDF() {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "mi_archivo.pdf";
+    link.click();
+  }
+</script>
+
+</body>
+</html>
