@@ -654,6 +654,11 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
+
+
+    <script src="js/music.js"></script>
+
+    
     <script>
         AOS.init({ duration: 1000, once: true });
 
@@ -670,87 +675,6 @@
                 if (chevron) chevron.style.transform = 'rotate(-90deg)';
             }
         }
-
-        // ========== REPRODUCTOR DE MÚSICA (código preservado completamente) ==========
-        const playlist = [
-            "01. Daddy’s Groove - Stellar (Martin Garrix Remix).wav",
-            "FTampa, The OtherZ, NUZB - Lakers (Extended Mix).mp3",
-            "Make Up Your Mind vs Glitch (Martin Garrix Mashup).wav"
-        ];
-
-        let currentIndex = 0;
-        const audio = document.getElementById('bg-audio');
-        const playBtn = document.getElementById('play-btn');
-        const songNameEl = document.getElementById('song-name');
-        const musicIcon = document.getElementById('music-icon');
-        const progressBar = document.getElementById('progress-bar');
-        const progressBarWrap = document.getElementById('progress-bar-wrap');
-        const player = document.getElementById('music-player');
-
-        audio.volume = 0.4;
-
-        function loadSong(index) {
-            const fileName = playlist[index];
-            audio.src = 'assets/audio/' + encodeURIComponent(fileName);
-            songNameEl.textContent = fileName.replace(/\.[^.]+$/, '');
-            progressBar.style.width = '0%';
-        }
-
-        function toggleMusic() {
-            if (audio.paused) {
-                audio.play().then(() => {
-                    playBtn.textContent = '⏸';
-                    musicIcon.classList.add('spinning');
-                    player.classList.add('playing');
-                }).catch(() => {
-                    songNameEl.textContent = 'Error al cargar audio';
-                });
-            } else {
-                audio.pause();
-                playBtn.textContent = '▶';
-                musicIcon.classList.remove('spinning');
-                player.classList.remove('playing');
-            }
-        }
-
-        function nextSong() {
-            currentIndex = (currentIndex + 1) % playlist.length;
-            loadSong(currentIndex);
-            audio.play().then(() => {
-                playBtn.textContent = '⏸';
-                musicIcon.classList.add('spinning');
-                player.classList.add('playing');
-            });
-        }
-
-        audio.addEventListener('ended', () => { nextSong(); });
-
-        progressBarWrap.addEventListener('click', (e) => {
-            if (!audio.duration) return;
-            const rect = progressBarWrap.getBoundingClientRect();
-            const clickX = e.clientX - rect.left;
-            const pct = clickX / rect.width;
-            audio.currentTime = pct * audio.duration;
-            progressBar.style.transition = 'none';
-            progressBar.style.width = (pct * 100) + '%';
-            setTimeout(() => progressBar.style.transition = 'width 0.5s linear', 50);
-        });
-
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                progressBar.style.width = (audio.currentTime / audio.duration * 100) + '%';
-            }
-        });
-
-        function setVolume(val) {
-            audio.volume = val;
-            const icon = document.getElementById('vol-icon');
-            if (val == 0) icon.className = 'fas fa-volume-mute';
-            else if (val < 0.5) icon.className = 'fas fa-volume-down';
-            else icon.className = 'fas fa-volume-up';
-        }
-
-        loadSong(currentIndex);
     </script>
 
 
