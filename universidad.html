@@ -6,22 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Michael | Portafolio Universitario</title>
 
-    <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts: Orbitron (Futurista) e Inter -->
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap"
-        rel="stylesheet">
-    <!-- Font Awesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- AOS Animaciones -->
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -34,11 +25,7 @@
             --folder-bg: rgba(15, 15, 30, 0.7);
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background-color: var(--dark-bg);
@@ -47,96 +34,88 @@
             overflow-x: hidden;
         }
 
-        h1,
-        h2,
-        h3,
-        .nav-link {
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 2px;
-        }
+        h1, h2, h3, .nav-link { font-family: 'Orbitron', sans-serif; letter-spacing: 2px; }
 
-        /* --- Fondo Animado --- */
         .bg-gradient-blur {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: radial-gradient(circle at 50% 50%, #1a0033 0%, #050505 100%);
             z-index: -2;
         }
 
         .neon-circle {
-            position: absolute;
-            width: 400px;
-            height: 400px;
-            background: var(--primary-purple);
-            filter: blur(180px);
-            opacity: 0.15;
-            z-index: -1;
-            border-radius: 50%;
+            position: absolute; width: 400px; height: 400px;
+            background: var(--primary-purple); filter: blur(180px);
+            opacity: 0.15; z-index: -1; border-radius: 50%;
         }
 
-        /* --- Navbar --- */
+        /* NAVBAR */
         .navbar {
             background: rgba(5, 5, 5, 0.85);
             backdrop-filter: blur(15px);
             border-bottom: 1px solid rgba(157, 0, 255, 0.3);
             z-index: 1030;
         }
+        .nav-link { color: var(--text-white) !important; font-size: 0.9rem; transition: 0.3s; }
+        .nav-link:hover { color: var(--primary-purple) !important; text-shadow: 0 0 10px var(--primary-purple); }
 
-        .nav-link {
-            color: var(--text-white) !important;
-            font-size: 0.9rem;
-            transition: 0.3s;
+        /* ═══ CARPETA PADRE (nivel 1) ═══ */
+        .parent-folder {
+            margin-bottom: 2.5rem;
+            border-radius: 24px;
+            background: rgba(5, 5, 20, 0.6);
+            backdrop-filter: blur(6px);
+            border: 1px solid rgba(157, 0, 255, 0.25);
+            overflow: hidden;
+            transition: border-color 0.3s;
         }
+        .parent-folder:hover { border-color: rgba(157, 0, 255, 0.5); }
 
-        .nav-link:hover {
-            color: var(--primary-purple) !important;
-            text-shadow: 0 0 10px var(--primary-purple);
-        }
-
-        /* --- Hero Section --- */
-        .hero-section {
-            height: 100vh;
+        .parent-folder-header {
             display: flex;
             align-items: center;
-            position: relative;
+            gap: 14px;
+            padding: 1.2rem 1.8rem;
+            background: rgba(20, 10, 50, 0.85);
+            cursor: pointer;
+            transition: background 0.3s;
+            border-bottom: 1px solid rgba(157, 0, 255, 0.2);
         }
+        .parent-folder-header:hover { background: rgba(35, 15, 75, 0.9); }
 
-        .glitch-title {
-            font-size: clamp(2.5rem, 8vw, 5rem);
+        .parent-folder-icon { font-size: 2.6rem; filter: drop-shadow(0 0 8px rgba(157, 0, 255, 0.7)); }
+
+        .parent-folder-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(to right, #fff, var(--primary-purple));
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, #fff 30%, #b76eff);
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 1rem;
+            background-clip: text;
+            color: transparent;
+            margin: 0;
         }
 
-        .btn-futuristic {
-            border: 1px solid var(--primary-purple);
-            color: var(--text-white);
-            background: transparent;
-            padding: 12px 30px;
-            border-radius: 0;
-            position: relative;
-            overflow: hidden;
-            transition: 0.4s;
-            text-transform: uppercase;
-            font-family: 'Orbitron';
-            font-size: 0.8rem;
+        .parent-folder-badge {
+            margin-left: auto;
+            background: rgba(157, 0, 255, 0.18);
+            border: 1px solid rgba(157, 0, 255, 0.4);
+            border-radius: 40px;
+            padding: 5px 14px;
+            font-size: 0.68rem;
+            font-family: monospace;
+            letter-spacing: 1px;
+            color: #c084fc;
         }
 
-        .btn-futuristic:hover {
-            background: var(--primary-purple);
-            box-shadow: 0 0 30px var(--primary-purple);
-            color: white;
-        }
+        .parent-folder-chevron { font-size: 0.9rem; opacity: 0.6; transition: transform 0.3s; }
 
-        /* --- CARPETAS (FOLDERS) --- */
+        .parent-folder-content { padding: 1.5rem 1.8rem 2rem; }
+
+        /* ═══ CARPETA HIJA (nivel 2) — igual a las originales ═══ */
         .folder-container {
-            margin-bottom: 3rem;
-            border-radius: 28px;
+            margin-bottom: 1.8rem;
+            border-radius: 22px;
             background: rgba(5, 5, 15, 0.5);
             backdrop-filter: blur(4px);
             transition: all 0.25s ease;
@@ -146,30 +125,26 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 1rem 1.5rem;
+            padding: 0.9rem 1.4rem;
             background: var(--folder-bg);
             border: 1px solid var(--folder-border);
-            border-radius: 22px 22px 28px 28px;
-            margin-bottom: 1.8rem;
+            border-radius: 18px 18px 22px 22px;
+            margin-bottom: 1.5rem;
             cursor: pointer;
             transition: all 0.3s;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
         }
-
         .folder-header:hover {
             border-color: var(--primary-purple);
             background: rgba(30, 20, 55, 0.8);
             transform: translateY(-3px);
         }
 
-        .folder-icon {
-            font-size: 2.2rem;
-            filter: drop-shadow(0 0 5px rgba(157, 0, 255, 0.6));
-        }
+        .folder-icon { font-size: 2rem; filter: drop-shadow(0 0 5px rgba(157, 0, 255, 0.6)); }
 
         .folder-title {
             font-family: 'Orbitron', monospace;
-            font-size: 1.7rem;
+            font-size: 1.4rem;
             font-weight: 600;
             letter-spacing: 2px;
             margin: 0;
@@ -182,20 +157,17 @@
         .folder-badge {
             background: rgba(157, 0, 255, 0.25);
             border-radius: 40px;
-            padding: 6px 14px;
-            font-size: 0.7rem;
+            padding: 5px 12px;
+            font-size: 0.68rem;
             font-family: monospace;
             letter-spacing: 1px;
             border-left: 2px solid var(--primary-purple);
             margin-left: auto;
         }
 
-        .folder-content {
-            padding: 0.5rem 1rem 1.5rem 1rem;
-            transition: all 0.2s;
-        }
+        .folder-content { padding: 0.5rem 0.8rem 1.2rem; }
 
-        /* Cards estilo vidrio dentro de carpetas */
+        /* Cards */
         .glass-card {
             background: var(--card-bg);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -204,7 +176,6 @@
             padding: 2rem;
             transition: 0.4s;
         }
-
         .glass-card:hover {
             border-color: var(--primary-purple);
             transform: translateY(-10px);
@@ -212,11 +183,8 @@
         }
 
         .card-img-top {
-            width: 100%;
-            height: 220px;
-            object-fit: cover;
-            border-top-left-radius: 16px;
-            border-top-right-radius: 16px;
+            width: 100%; height: 220px; object-fit: cover;
+            border-top-left-radius: 16px; border-top-right-radius: 16px;
             transition: transform 0.4s;
         }
 
@@ -230,190 +198,74 @@
             overflow: hidden;
             height: 100%;
         }
-
         .card:hover {
             border-color: var(--primary-purple);
             transform: translateY(-6px);
             box-shadow: 0 15px 35px rgba(157, 0, 255, 0.2);
         }
+        .card-body { background: transparent; padding: 1.2rem; }
+        .card-title { font-family: 'Orbitron', monospace; font-size: 1.1rem; letter-spacing: 1px; }
 
-        .card-body {
-            background: transparent;
-            padding: 1.2rem;
+        /* Separador dentro de carpeta padre */
+        .subfolder-divider {
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(157,0,255,0.3), transparent);
+            margin: 0.5rem 0 1.8rem;
         }
 
-        .card-title {
-            font-family: 'Orbitron', monospace;
-            font-size: 1.2rem;
-            letter-spacing: 1px;
-        }
+        /* Footer */
+        footer { border-top: 1px solid rgba(255, 255, 255, 0.05); padding: 40px 0; margin-top: 60px; }
 
-        /* Animación sutil de carpetas */
-        @keyframes gentlePulse {
-            0% {
-                border-left-color: rgba(157, 0, 255, 0.4);
-            }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--dark-bg); }
+        ::-webkit-scrollbar-thumb { background: var(--secondary-purple); border-radius: 10px; }
 
-            100% {
-                border-left-color: rgba(157, 0, 255, 1);
-            }
-        }
-
-        /* --- Footer --- */
-        footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 40px 0;
-            margin-top: 60px;
-        }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--dark-bg);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--secondary-purple);
-            border-radius: 10px;
-        }
-
-        /* Reproducer mantenido exactamente igual */
+        /* Reproductor */
         #music-player {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 9999;
+            position: fixed; bottom: 24px; right: 24px; z-index: 9999;
             background: rgba(10, 5, 25, 0.90);
             border: 1px solid rgba(157, 0, 255, 0.45);
             backdrop-filter: blur(16px);
-            border-radius: 18px;
-            padding: 12px 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            border-radius: 18px; padding: 12px 18px;
+            display: flex; align-items: center; gap: 12px;
             box-shadow: 0 0 30px rgba(157, 0, 255, 0.2);
-            font-family: 'Orbitron', sans-serif;
-            min-width: 260px;
-            transition: box-shadow 0.3s;
+            font-family: 'Orbitron', sans-serif; min-width: 260px; transition: box-shadow 0.3s;
         }
+        #music-player.playing { box-shadow: 0 0 40px rgba(157, 0, 255, 0.45); border-color: rgba(157, 0, 255, 0.8); }
+        #music-icon { font-size: 1.3rem; display: inline-block; animation: none; }
+        #music-icon.spinning { animation: spin 2.5s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        #song-name { font-size: 0.6rem; color: #ccc; letter-spacing: 1px; max-width: 110px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
+        #play-btn, #next-btn { background: transparent; border: 1px solid rgba(157, 0, 255, 0.7); color: white; border-radius: 50%; cursor: pointer; transition: background 0.3s, box-shadow 0.3s; display: flex; align-items: center; justify-content: center; }
+        #play-btn { width: 36px; height: 36px; font-size: 0.95rem; }
+        #next-btn { width: 28px; height: 28px; font-size: 0.75rem; border-color: rgba(157, 0, 255, 0.5); }
+        #play-btn:hover, #next-btn:hover { background: var(--primary-purple); box-shadow: 0 0 14px var(--primary-purple); }
+        #vol-slider { width: 64px; accent-color: #9d00ff; cursor: pointer; flex-shrink: 0; }
+        #vol-icon { font-size: 0.8rem; color: rgba(157, 0, 255, 0.8); }
+        #progress-bar-wrap { position: absolute; bottom: 0; left: 0; width: 100%; height: 5px; background: rgba(255, 255, 255, 0.07); border-radius: 0 0 18px 18px; overflow: hidden; cursor: pointer; transition: height 0.2s; }
+        #progress-bar-wrap:hover { height: 8px; }
+        #progress-bar { height: 100%; width: 0%; background: linear-gradient(to right, #6a00f4, #9d00ff); transition: width 0.5s linear; pointer-events: none; }
 
-        #music-player.playing {
-            box-shadow: 0 0 40px rgba(157, 0, 255, 0.45);
-            border-color: rgba(157, 0, 255, 0.8);
-        }
-
-        #music-icon {
-            font-size: 1.3rem;
-            display: inline-block;
-            animation: none;
-        }
-
-        #music-icon.spinning {
-            animation: spin 2.5s linear infinite;
-        }
-
-        @keyframes spin {
-            from {
-                transform: rotate(0deg);
-            }
-
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        #song-name {
-            font-size: 0.6rem;
-            color: #ccc;
-            letter-spacing: 1px;
-            max-width: 110px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            flex: 1;
-        }
-
-        #play-btn,
-        #next-btn {
-            background: transparent;
-            border: 1px solid rgba(157, 0, 255, 0.7);
-            color: white;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: background 0.3s, box-shadow 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        #play-btn {
-            width: 36px;
-            height: 36px;
-            font-size: 0.95rem;
-        }
-
-        #next-btn {
-            width: 28px;
-            height: 28px;
-            font-size: 0.75rem;
-            border-color: rgba(157, 0, 255, 0.5);
-        }
-
-        #play-btn:hover,
-        #next-btn:hover {
-            background: var(--primary-purple);
-            box-shadow: 0 0 14px var(--primary-purple);
-        }
-
-        #vol-slider {
-            width: 64px;
-            accent-color: #9d00ff;
-            cursor: pointer;
-            flex-shrink: 0;
-        }
-
-        #vol-icon {
-            font-size: 0.8rem;
-            color: rgba(157, 0, 255, 0.8);
-        }
-
-        #progress-bar-wrap {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: rgba(255, 255, 255, 0.07);
-            border-radius: 0 0 18px 18px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: height 0.2s;
-        }
-
-        #progress-bar-wrap:hover {
-            height: 8px;
-        }
-
-        #progress-bar {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(to right, #6a00f4, #9d00ff);
-            transition: width 0.5s linear;
-            pointer-events: none;
+        /* Etiqueta de materia en carpeta padre */
+        .subject-tag {
+            font-size: 0.65rem;
+            font-family: monospace;
+            letter-spacing: 2px;
+            color: #b76eff;
+            text-transform: uppercase;
+            margin-bottom: 0.3rem;
+            display: block;
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Fondo decorativo (sin cambios) -->
     <div class="bg-gradient-blur"></div>
     <div class="neon-circle" style="top: 10%; right: -5%;"></div>
     <div class="neon-circle" style="bottom: 10%; left: -5%;"></div>
 
-    <!-- NAVBAR igual -->
+    <!-- NAVBAR -->
     <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">&lt; DEV.PORT /&gt;</a>
@@ -431,198 +283,263 @@
         </div>
     </nav>
 
-    <!-- ═════════ SECCIÓN UNIVERSIDAD CON CARPETAS (ACTIVIDAD 4 Y ACTIVIDAD 5) ═════════ -->
+    <!-- ═══════════════════════════════════════════════════════ -->
+    <!--              SECCIÓN UNIVERSIDAD                        -->
+    <!-- ═══════════════════════════════════════════════════════ -->
     <section id="universidad" class="py-5" style="padding-top: 100px !important;">
         <div class="container">
+
             <h2 class="display-6 mb-5" data-aos="fade-up"
                 style="font-family: 'Playfair Display', serif; border-left: 5px solid #9d00ff; padding-left: 20px;">
-                UNIVERSIDAD</h2>
+                UNIVERSIDAD
+            </h2>
 
-            <!-- ================= CARPETA: ACTIVIDAD 4 - GRÁFICOS 2D ================= -->
-            <div class="folder-container" data-aos="fade-up" data-aos-delay="50">
-                <div class="folder-header" onclick="toggleFolder(this)">
-                    <i class="fas fa-folder-open folder-icon" style="color: #b76eff;"></i>
-                    <span class="folder-title">Actividad 4 / 2D</span>
-                    <span class="folder-badge"><i class="fas fa-cubes"></i> 3 ejercicios | DOM · Puntos · Curvas</span>
-                    <i class="fas fa-chevron-down ms-2" style="transition: 0.2s; opacity: 0.7;"></i>
-                </div>
-                <div class="folder-content" style="display: none;">
-                    <div class="row g-4">
-                        <!-- Ejercicio 2D 1: DOM -->
-                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                            <a href="C.G/DOM.html" target="_blank" class="text-decoration-none">
-                                <div class="card h-100">
-                                    <img src="assets/img/Barras.png" class="card-img-top" alt="Gráfico de barras DOM">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><i class="fas fa-chart-bar me-2"></i> DOM interactivo
-                                        </h5>
-                                        <p class="card-text">Gráfico de barras dinámicas mediante manipulación del DOM.
-                                        </p>
-                                        <span class="badge bg-dark text-purple">CSS/JS</span>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <!-- Ejercicio 2D 2: Puntos en movimiento -->
-                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                            <a href="C.G/Gráfico_Puntos_Movimiento.html" target="_blank" class="text-decoration-none">
-                                <div class="card h-100">
-                                    <img src="assets/img/Puntos.png" class="card-img-top" alt="Puntos en movimiento">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><i class="fas fa-chart-line me-2"></i> Puntos cinéticos
-                                        </h5>
-                                        <p class="card-text">Visualización de puntos con desplazamiento y trayectorias.
-                                        </p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
-                        <!-- Ejercicio 2D 3: Curva coseno dinámica -->
-                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                            <a href="C.G/curva_dinamica_coseno.html" target="_blank" class="text-decoration-none">
-                                <div class="card h-100">
-                                    <img src="assets/img/Coseno.png" class="card-img-top" alt="Curva coseno">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><i class="fas fa-waveform me-2"></i> Curva dinámica
-                                            coseno</h5>
-                                        <p class="card-text">Generación en tiempo real de una función coseno animada.
-                                        </p>
-                                    </div>
-                                </div>
-                            </a>
-                        </div>
+            <!-- ╔══════════════════════════════════════════════╗ -->
+            <!-- ║     CARPETA PADRE: COMPUTACIÓN GRÁFICA       ║ -->
+            <!-- ╚══════════════════════════════════════════════╝ -->
+            <div class="parent-folder" data-aos="fade-up" data-aos-delay="50">
+
+                <div class="parent-folder-header" onclick="toggleParent(this)">
+                    <i class="fas fa-folder-open parent-folder-icon" style="color: #b76eff;"></i>
+                    <div>
+                        <span class="subject-tag">Materia</span>
+                        <span class="parent-folder-title">Computación Gráfica</span>
                     </div>
+                    <span class="parent-folder-badge"><i class="fas fa-cubes me-1"></i> 3 actividades</span>
+                    <i class="fas fa-chevron-down parent-folder-chevron ms-2"></i>
                 </div>
-            </div>
 
-            <!-- ================= CARPETA: ACTIVIDAD 5 - GRÁFICOS 3D ================= -->
-            <div class="folder-container" data-aos="fade-up" data-aos-delay="150">
-                <div class="folder-header" onclick="toggleFolder(this)">
-                    <i class="fas fa-cube folder-icon" style="color: #b76eff;"></i>
-                    <span class="folder-title">Actividad 5 / 3D</span>
-                    <span class="folder-badge"><i class="fas fa-cube"></i> 3 ejercicios | Traslación · Rotación ·
-                        Escalado</span>
-                    <i class="fas fa-chevron-down ms-2" style="transition: 0.2s; opacity: 0.7;"></i>
-                </div>
-                <div class="folder-content" style="display: none;">
-                    <div class="row g-4">
-                        <!-- Trabajo 3D 1: Desplazamiento lineal -->
-                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
-                            <a href="C.G/Desplazamiento_lineal_3d.html" target="_blank" class="text-decoration-none">
-                                <div class="card h-100">
-                                    <img src="assets/img/ejercicio_1_3d.png" class="card-img-top"
-                                        alt="Cubo desplazamiento">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><i class="fas fa-arrows-alt me-2"></i> Traslación lineal
-                                            3D</h5>
-                                        <p class="card-text">Cubo moviéndose suavemente en el espacio tridimensional.
-                                        </p>
-                                    </div>
+                <div class="parent-folder-content" style="display: none;">
+
+                    <!-- ── Actividad 4 / 2D ── -->
+                    <div class="folder-container" data-aos="fade-up" data-aos-delay="80">
+                        <div class="folder-header" onclick="toggleFolder(this)">
+                            <i class="fas fa-folder-open folder-icon" style="color: #b76eff;"></i>
+                            <span class="folder-title">Actividad 4 / 2D</span>
+                            <span class="folder-badge"><i class="fas fa-cubes"></i> 3 ejercicios | DOM · Puntos · Curvas</span>
+                            <i class="fas fa-chevron-down ms-2" style="transition: 0.2s; opacity: 0.7;"></i>
+                        </div>
+                        <div class="folder-content" style="display: none;">
+                            <div class="row g-4">
+                                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                                    <a href="C.G/DOM.html" target="_blank" class="text-decoration-none">
+                                        <div class="card h-100">
+                                            <img src="assets/img/Barras.png" class="card-img-top" alt="Gráfico de barras DOM">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-chart-bar me-2"></i> DOM interactivo</h5>
+                                                <p class="card-text">Gráfico de barras dinámicas mediante manipulación del DOM.</p>
+                                                <span class="badge bg-dark text-purple">CSS/JS</span>
+                                            </div>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <!-- Trabajo 3D 2: Rotación cubo -->
-                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
-                            <a href="C.G/rotacion_cubo_3d.html" target="_blank" class="text-decoration-none">
-                                <div class="card h-100">
-                                    <img src="assets/img/ejercicio_2_3d.png" class="card-img-top" alt="Rotación 3D">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><i class="fas fa-sync-alt me-2"></i> Rotación en ejes X/Y
-                                        </h5>
-                                        <p class="card-text">Rotación tridimensional completa con controles opcionales.
-                                        </p>
-                                    </div>
+                                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                                    <a href="C.G/Gráfico_Puntos_Movimiento.html" target="_blank" class="text-decoration-none">
+                                        <div class="card h-100">
+                                            <img src="assets/img/Puntos.png" class="card-img-top" alt="Puntos en movimiento">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-chart-line me-2"></i> Puntos cinéticos</h5>
+                                                <p class="card-text">Visualización de puntos con desplazamiento y trayectorias.</p>
+                                            </div>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                        <!-- Trabajo 3D 3: Transformaciones integradas -->
-                        <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
-                            <a href="C.G/transformaciones_3D.html" target="_blank" class="text-decoration-none">
-                                <div class="card h-100">
-                                    <img src="assets/img/ejercicios_3_3d.png" class="card-img-top"
-                                        alt="Transform múltiple">
-                                    <div class="card-body">
-                                        <h5 class="card-title"><i class="fas fa-crop-alt me-2"></i> Traslación +
-                                            Rotación + Escala</h5>
-                                        <p class="card-text">Combinación de transformaciones afines en objetos 3D.</p>
-                                    </div>
+                                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                                    <a href="C.G/curva_dinamica_coseno.html" target="_blank" class="text-decoration-none">
+                                        <div class="card h-100">
+                                            <img src="assets/img/Coseno.png" class="card-img-top" alt="Curva coseno">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-wave-square me-2"></i> Curva dinámica coseno</h5>
+                                                <p class="card-text">Generación en tiempo real de una función coseno animada.</p>
+                                            </div>
+                                        </div>
+                                    </a>
                                 </div>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="folder-container" data-aos="fade-up" data-aos-delay="150">
-
-                <!-- HEADER -->
-                <div class="folder-header" onclick="toggleFolder(this)">
-                    <i class="fas fa-file-alt folder-icon" style="color: #b76eff;"></i>
-                    <span class="folder-title">Actividad 6 / Monografía</span>
-                    <span class="folder-badge">
-                        <i class="fas fa-file-pdf"></i> 2 documentos | Curvas Paramétricas · Mallas Poligonales
-                    </span>
-                    <i class="fas fa-chevron-down ms-2"></i>
-                </div>
-
-                <!-- CONTENIDO -->
-                <div class="folder-content" style="display: none;">
-
-                    <!-- LISTA DE PDFs -->
-                    <div class="row g-3 mb-4">
-
-                        <div class="col-md-4">
-                            <button class="btn btn-dark w-100"
-                                onclick="cargarPDF('pdfs/curvas_parametricas.pdf','Curvas Paramétricas','Las curvas paramétricas definen coordenadas mediante un parámetro independiente, permitiendo representar trayectorias complejas como espirales o lazos. Su análisis matemático incluye el cálculo de derivadas, longitud de arco y curvatura. Son fundamentales en física, ingeniería y computación gráfica para el diseño CAD y animaciones',)">
-                                📄 Curvas Paramétricas
-                            </button>
-                        </div>
-
-                        <div class="col-md-4">
-                            <button class="btn btn-dark w-100"
-                                onclick="cargarPDF('pdfs/Mallas_Poligonales_Gutierrez.pdf','Mallas Poligonales','Las mallas poligonales son estructuras compuestas por vértices, aristas y caras que definen superficies tridimensionales. Son el estándar en computación gráfica por su eficiencia, empleando principalmente triángulos y cuadriláteros. Mediante operaciones como subdivisión y simplificación, se aplican en videojuegos, animación e impresión 3D.')">
-                                📄 Mallas Poligonales
-                            </button>
-                        </div>
-
-                    </div>
-
-                    <!-- VISOR + INFO -->
-                    <div class="row">
-
-                        <!-- VISOR PDF -->
-                        <div class="col-md-8">
-                            <iframe id="visorPDF" src="" width="100%" height="500px"
-                                style="border-radius:10px; border:1px solid rgba(157,0,255,0.3);">
-                            </iframe>
-                        </div>
-
-                        <!-- PANEL INFO -->
-                        <div class="col-md-4">
-                            <div class="p-3" style="background: rgba(255,255,255,0.05); border-radius:10px;">
-
-                                <h5 id="pdfTitulo">Selecciona un documento</h5>
-                                <p id="pdfDesc" class="text-muted">Aquí aparecerá la información.</p>
-
-
-
                             </div>
                         </div>
-
                     </div>
 
+                    <!-- ── Actividad 5 / 3D ── -->
+                    <div class="folder-container" data-aos="fade-up" data-aos-delay="120">
+                        <div class="folder-header" onclick="toggleFolder(this)">
+                            <i class="fas fa-cube folder-icon" style="color: #b76eff;"></i>
+                            <span class="folder-title">Actividad 5 / 3D</span>
+                            <span class="folder-badge"><i class="fas fa-cube"></i> 3 ejercicios | Traslación · Rotación · Escalado</span>
+                            <i class="fas fa-chevron-down ms-2" style="transition: 0.2s; opacity: 0.7;"></i>
+                        </div>
+                        <div class="folder-content" style="display: none;">
+                            <div class="row g-4">
+                                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                                    <a href="C.G/Desplazamiento_lineal_3d.html" target="_blank" class="text-decoration-none">
+                                        <div class="card h-100">
+                                            <img src="assets/img/ejercicio_1_3d.png" class="card-img-top" alt="Cubo desplazamiento">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-arrows-alt me-2"></i> Traslación lineal 3D</h5>
+                                                <p class="card-text">Cubo moviéndose suavemente en el espacio tridimensional.</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-md-4" data-aos="fade-up" data-aos-delay="200">
+                                    <a href="C.G/rotacion_cubo_3d.html" target="_blank" class="text-decoration-none">
+                                        <div class="card h-100">
+                                            <img src="assets/img/ejercicio_2_3d.png" class="card-img-top" alt="Rotación 3D">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-sync-alt me-2"></i> Rotación en ejes X/Y</h5>
+                                                <p class="card-text">Rotación tridimensional completa con controles opcionales.</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                                <div class="col-md-4" data-aos="fade-up" data-aos-delay="300">
+                                    <a href="C.G/transformaciones_3D.html" target="_blank" class="text-decoration-none">
+                                        <div class="card h-100">
+                                            <img src="assets/img/ejercicios_3_3d.png" class="card-img-top" alt="Transform múltiple">
+                                            <div class="card-body">
+                                                <h5 class="card-title"><i class="fas fa-crop-alt me-2"></i> Traslación + Rotación + Escala</h5>
+                                                <p class="card-text">Combinación de transformaciones afines en objetos 3D.</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Actividad 6 / Monografía ── -->
+                    <div class="folder-container" data-aos="fade-up" data-aos-delay="160">
+                        <div class="folder-header" onclick="toggleFolder(this)">
+                            <i class="fas fa-file-alt folder-icon" style="color: #b76eff;"></i>
+                            <span class="folder-title">Actividad 6 / Monografía</span>
+                            <span class="folder-badge"><i class="fas fa-file-pdf"></i> 2 documentos | Curvas Paramétricas · Mallas Poligonales</span>
+                            <i class="fas fa-chevron-down ms-2" style="transition: 0.2s; opacity: 0.7;"></i>
+                        </div>
+                        <div class="folder-content" style="display: none;">
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-4">
+                                    <button class="btn btn-dark w-100"
+                                        onclick="cargarPDF('pdfs/curvas_parametricas.pdf','Curvas Paramétricas','Las curvas paramétricas definen coordenadas mediante un parámetro independiente, permitiendo representar trayectorias complejas como espirales o lazos. Su análisis matemático incluye el cálculo de derivadas, longitud de arco y curvatura. Son fundamentales en física, ingeniería y computación gráfica para el diseño CAD y animaciones.')">
+                                        📄 Curvas Paramétricas
+                                    </button>
+                                </div>
+                                <div class="col-md-4">
+                                    <button class="btn btn-dark w-100"
+                                        onclick="cargarPDF('pdfs/Mallas_Poligonales_Gutierrez.pdf','Mallas Poligonales','Las mallas poligonales son estructuras compuestas por vértices, aristas y caras que definen superficies tridimensionales. Son el estándar en computación gráfica por su eficiencia, empleando principalmente triángulos y cuadriláteros. Mediante operaciones como subdivisión y simplificación, se aplican en videojuegos, animación e impresión 3D.')">
+                                        📄 Mallas Poligonales
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <iframe id="visorPDF" src="" width="100%" height="500px"
+                                        style="border-radius:10px; border:1px solid rgba(157,0,255,0.3);"></iframe>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3" style="background: rgba(255,255,255,0.05); border-radius:10px;">
+                                        <h5 id="pdfTitulo">Selecciona un documento</h5>
+                                        <p id="pdfDesc" class="text-muted">Aquí aparecerá la información.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /parent-folder-content CG -->
+            </div><!-- /parent-folder CG -->
+
+
+            <!-- ╔══════════════════════════════════════════════╗ -->
+            <!-- ║         CARPETA PADRE: FÍSICA II             ║ -->
+            <!-- ╚══════════════════════════════════════════════╝ -->
+            <div class="parent-folder" data-aos="fade-up" data-aos-delay="100">
+
+                <div class="parent-folder-header" onclick="toggleParent(this)">
+                    <i class="fas fa-atom parent-folder-icon" style="color: #7ec8ff;"></i>
+                    <div>
+                        <span class="subject-tag">Materia</span>
+                        <span class="parent-folder-title" style="background: linear-gradient(135deg, #fff 30%, #7ec8ff); -webkit-background-clip: text; background-clip: text; color: transparent;">
+                            Física II
+                        </span>
+                    </div>
+                    <span class="parent-folder-badge" style="border-color: rgba(126,200,255,0.6); color: #7ec8ff;">
+                        <i class="fas fa-wave-square me-1"></i> 1 exposición
+                    </span>
+                    <i class="fas fa-chevron-down parent-folder-chevron ms-2"></i>
                 </div>
+
+                <div class="parent-folder-content" style="display: none;">
+
+                    <!-- Exposición 1: Oscilaciones Amortiguadas -->
+                    <div class="folder-container" data-aos="fade-up" data-aos-delay="80">
+                        <div class="folder-header" onclick="toggleFolder(this)"
+                            style="border-color: rgba(126,200,255,0.35);">
+                            <i class="fas fa-folder-open folder-icon" style="color: #7ec8ff;"></i>
+                            <span class="folder-title" style="background: linear-gradient(135deg, #fff, #7ec8ff); -webkit-background-clip: text; background-clip: text;">
+                                Exposición 1
+                            </span>
+                            <span class="folder-badge" style="border-left-color: #7ec8ff;">
+                                <i class="fas fa-wave-square"></i> 1 tema | Oscilaciones
+                            </span>
+                            <i class="fas fa-chevron-down ms-2" style="transition: 0.2s; opacity: 0.7;"></i>
+                        </div>
+                        <div class="folder-content" style="display: none;">
+                            <div class="row g-4">
+                                <div class="col-md-4" data-aos="fade-up" data-aos-delay="100">
+                                    <a href="Física2/Física_II_expo01.html" target="_blank" class="text-decoration-none">
+                                        <div class="card h-100" style="border-color: rgba(126,200,255,0.25);">
+                                            <img src="assets/img/Fisica/fisica2_expo_01.png" class="card-img-top" alt="Oscilaciones Amortiguadas">
+                                            <div class="card-body">
+                                                <h5 class="card-title" style="font-size: 1rem;">
+                                                    <i class="fas fa-wave-square me-2" style="color: #7ec8ff;"></i>
+                                                    Oscilaciones Amortiguadas
+                                                </h5>
+                                                <p class="card-text" style="font-size: 0.85rem; color: #aaa;">
+                                                    Análisis del movimiento oscilatorio con amortiguamiento en sistemas mecánicos.
+                                                </p>
+                                                <span class="badge" style="background: rgba(126,200,255,0.15); color: #7ec8ff; border: 1px solid rgba(126,200,255,0.3);">Física II</span>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Segunda carpeta placeholder -->
+                    <div class="folder-container" data-aos="fade-up" data-aos-delay="120">
+                        <div class="folder-header" onclick="toggleFolder(this)"
+                            style="border-color: rgba(126,200,255,0.35);">
+                            <i class="fas fa-folder folder-icon" style="color: #7ec8ff;"></i>
+                            <span class="folder-title" style="background: linear-gradient(135deg, #fff, #7ec8ff); -webkit-background-clip: text; background-clip: text;">
+                                Exposición 2
+                            </span>
+                            <span class="folder-badge" style="border-left-color: #7ec8ff;">
+                                <i class="fas fa-plus-circle"></i> agregar contenido
+                            </span>
+                            <i class="fas fa-chevron-down ms-2" style="transition: 0.2s; opacity: 0.7;"></i>
+                        </div>
+                        <div class="folder-content" style="display: none;">
+                            <div class="text-center py-5" style="opacity: 0.45;">
+                                <i class="fas fa-folder-plus" style="font-size: 3rem; color: #7ec8ff; margin-bottom: 1rem; display: block;"></i>
+                                <p style="font-family: 'Orbitron', monospace; font-size: 0.8rem; letter-spacing: 2px;">
+                                    Aún no hay contenido · Agrega tus recursos aquí
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div><!-- /parent-folder-content F2 -->
+            </div><!-- /parent-folder F2 -->
+
+
+            <div class="text-center mt-4 opacity-50 small">
+                <i class="fas fa-folder-tree"></i> Estructura: Computación Gráfica (Act. 4 · 5 · 6) &nbsp;·&nbsp; Física II
             </div>
 
-            <!-- Pequeño aviso: se preservaron absolutamente todos los enlaces y recursos -->
-            <div class="text-center mt-4 opacity-50 small">
-                <i class="fas fa-folder-tree"></i> Estructura organizada: Actividad 4 (2D) y Actividad 5 (3D)
-            </div>
         </div>
     </section>
 
-    <!-- FOOTER (sin cambios) -->
+    <!-- FOOTER -->
     <footer class="text-center">
         <div class="container">
             <div class="d-flex justify-content-center gap-4 mb-4">
@@ -630,80 +547,61 @@
                 <a href="#" class="text-white fs-4"><i class="fab fa-linkedin"></i></a>
                 <a href="#" class="text-white fs-4"><i class="fab fa-twitter"></i></a>
             </div>
-            <p class="text-secondary small">&copy; 2025 | Hecho con <i class="fas fa-heart text-white"></i> por Michael
-                · Gráficos U</p>
+            <p class="text-secondary small">&copy; 2025 | Hecho con <i class="fas fa-heart text-white"></i> por Michael · Gráficos U</p>
         </div>
     </footer>
 
-    <!-- REPRODUCTOR DE MÚSICA FLOTANTE (funcionalidad idéntica a la original) -->
+    <!-- REPRODUCTOR -->
     <div id="music-player">
         <span id="music-icon">🎵</span>
         <span id="song-name">Cargando...</span>
         <button id="play-btn" onclick="toggleMusic()" title="Play / Pause">▶</button>
         <button id="next-btn" onclick="nextSong()" title="Siguiente">⏭</button>
         <i class="fas fa-volume-up" id="vol-icon"></i>
-        <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.4" oninput="setVolume(this.value)"
-            title="Volumen">
-        <div id="progress-bar-wrap">
-            <div id="progress-bar"></div>
-        </div>
+        <input type="range" id="vol-slider" min="0" max="1" step="0.05" value="0.4" oninput="setVolume(this.value)" title="Volumen">
+        <div id="progress-bar-wrap"><div id="progress-bar"></div></div>
     </div>
     <audio id="bg-audio"></audio>
 
-    <!-- Scripts Bootstrap y AOS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-
-
     <script src="js/music.js"></script>
 
-    
     <script>
         AOS.init({ duration: 1000, once: true });
 
-        // Función para colapsar/expandir carpetas (sin eliminar nada, solo pliegue visual)
-        function toggleFolder(headerElement) {
-            const folderContainer = headerElement.closest('.folder-container');
-            const contentDiv = folderContainer.querySelector('.folder-content');
-            const chevron = headerElement.querySelector('.fa-chevron-down');
-            if (contentDiv.style.display === 'none') {
-                contentDiv.style.display = 'block';
-                if (chevron) chevron.style.transform = 'rotate(0deg)';
-            } else {
-                contentDiv.style.display = 'none';
-                if (chevron) chevron.style.transform = 'rotate(-90deg)';
-            }
+        /* ── Carpeta PADRE (nivel 1) ── */
+        function toggleParent(headerEl) {
+            const content = headerEl.nextElementSibling;
+            const chevron = headerEl.querySelector('.parent-folder-chevron');
+            const isOpen = content.style.display !== 'none';
+            content.style.display = isOpen ? 'none' : 'block';
+            if (chevron) chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
         }
-    </script>
 
+        /* ── Carpeta HIJA (nivel 2) ── */
+        function toggleFolder(headerEl) {
+            const container = headerEl.closest('.folder-container');
+            const content = container.querySelector('.folder-content');
+            const chevron = headerEl.querySelector('.fa-chevron-down');
+            const isOpen = content.style.display !== 'none';
+            content.style.display = isOpen ? 'none' : 'block';
+            if (chevron) chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
+        }
 
-
-    <script>
-        let pdfActual = "";
-
-        function cargarPDF(ruta, titulo, descripcion, size) {
-            document.getElementById("visorPDF").src = ruta;
-
-            document.getElementById("pdfTitulo").textContent = titulo;
-            document.getElementById("pdfDesc").textContent = descripcion;
-            document.getElementById("pdfSize").textContent = size;
-
+        /* ── Visor PDF ── */
+        let pdfActual = '';
+        function cargarPDF(ruta, titulo, descripcion) {
+            document.getElementById('visorPDF').src = ruta;
+            document.getElementById('pdfTitulo').textContent = titulo;
+            document.getElementById('pdfDesc').textContent = descripcion;
             pdfActual = ruta;
         }
-
         function descargarPDF() {
-            if (!pdfActual) {
-                alert("Selecciona un PDF primero 😅");
-                return;
-            }
-
-            const link = document.createElement("a");
-            link.href = pdfActual;
-            link.download = "";
-            link.click();
+            if (!pdfActual) { alert('Selecciona un PDF primero 😅'); return; }
+            const link = document.createElement('a');
+            link.href = pdfActual; link.download = ''; link.click();
         }
     </script>
 </body>
-
 </html>

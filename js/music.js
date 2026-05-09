@@ -19,7 +19,9 @@ window.addEventListener("DOMContentLoaded", () => {
     progressBarWrap = document.getElementById('progress-bar-wrap');
     player = document.getElementById('music-player');
 
-    audio.volume = 0.4;
+    window.setVolume = function (value) {
+    audio.volume = value;
+}
 
     // ===== Cargar canción =====
     function loadSong(index) {
