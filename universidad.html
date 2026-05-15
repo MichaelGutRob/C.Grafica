@@ -256,6 +256,41 @@
             margin-bottom: 0.3rem;
             display: block;
         }
+
+        /* Cards de archivo (PPTX / PDF) */
+        .file-card {
+            background: rgba(20, 20, 35, 0.6);
+            backdrop-filter: blur(8px);
+            border-radius: 18px;
+            transition: 0.3s;
+            color: #fff;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1.5rem;
+            gap: 1rem;
+            text-align: center;
+        }
+        .file-card:hover {
+            transform: translateY(-6px);
+        }
+        .file-card .file-icon {
+            font-size: 4rem;
+            transition: filter 0.3s;
+        }
+        .file-card .file-title {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.95rem;
+            letter-spacing: 1px;
+        }
+        .file-card .file-desc {
+            font-size: 0.82rem;
+            color: #aaa;
+            margin: 0;
+        }
     </style>
 </head>
 
@@ -305,7 +340,7 @@
                         <span class="subject-tag">Materia</span>
                         <span class="parent-folder-title">Computación Gráfica</span>
                     </div>
-                    <span class="parent-folder-badge"><i class="fas fa-cubes me-1"></i> 3 actividades</span>
+                    <span class="parent-folder-badge"><i class="fas fa-cubes me-1"></i> 4 actividades</span>
                     <i class="fas fa-chevron-down parent-folder-chevron ms-2"></i>
                 </div>
 
@@ -444,6 +479,87 @@
                         </div>
                     </div>
 
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <!-- ──          EXPOSICIÓN  (nueva actividad)          ── -->
+                    <!-- ══════════════════════════════════════════════════════ -->
+                    <div class="folder-container" data-aos="fade-up" data-aos-delay="200">
+                        <div class="folder-header" onclick="toggleFolder(this)">
+                            <i class="fas fa-chalkboard-teacher folder-icon" style="color: #b76eff;"></i>
+                            <span class="folder-title">Exposición</span>
+                            <span class="folder-badge">
+                                <i class="fas fa-file-powerpoint me-1"></i> 2 archivos | PPTX · PDF
+                            </span>
+                            <i class="fas fa-chevron-down ms-2" style="transition: 0.2s; opacity: 0.7;"></i>
+                        </div>
+
+                        <div class="folder-content" style="display: none;">
+                            <div class="row g-4">
+
+                                <!-- ── Tarjeta PPTX ── -->
+                                <div class="col-md-6" data-aos="fade-up" data-aos-delay="100">
+                                    <a href="Ecosistema_de_Modelado_3D (1).pptx" target="_blank" class="text-decoration-none">
+                                        <div class="file-card"
+                                             style="border: 1px solid rgba(255,107,53,0.3); box-shadow: 0 0 0 transparent; transition: 0.3s;"
+                                             onmouseenter="this.style.boxShadow='0 12px 36px rgba(255,107,53,0.2)'; this.style.borderColor='rgba(255,107,53,0.7)';"
+                                             onmouseleave="this.style.boxShadow='0 0 0 transparent'; this.style.borderColor='rgba(255,107,53,0.3)';">
+                                            <i class="fas fa-file-powerpoint file-icon"
+                                               style="color: #ff6b35; filter: drop-shadow(0 0 14px rgba(255,107,53,0.55));"></i>
+                                            <p class="file-title">Ecosistema de Modelado 3D</p>
+                                            <p class="file-desc">Presentación de diapositivas sobre herramientas y flujos de trabajo en modelado 3D.</p>
+                                            <span class="badge mt-1"
+                                                  style="background: rgba(255,107,53,0.12); color: #ff6b35; border: 1px solid rgba(255,107,53,0.4); font-size: 0.72rem; padding: 6px 14px; border-radius: 30px;">
+                                                <i class="fas fa-external-link-alt me-1"></i> Abrir presentación
+                                            </span>
+                                        </div>
+                                    </a>
+                                </div>
+
+                                <!-- ── Tarjeta PDF ── -->
+                                <div class="col-md-6" data-aos="fade-up" data-aos-delay="200">
+                                    <div class="file-card"
+                                         style="border: 1px solid rgba(229,62,62,0.3); cursor: pointer; box-shadow: 0 0 0 transparent; transition: 0.3s;"
+                                         onmouseenter="this.style.boxShadow='0 12px 36px rgba(229,62,62,0.2)'; this.style.borderColor='rgba(229,62,62,0.7)';"
+                                         onmouseleave="this.style.boxShadow='0 0 0 transparent'; this.style.borderColor='rgba(229,62,62,0.3)';"
+                                         onclick="abrirExpoPDF('Mono_CG final.pdf','Mono CG Final','Monografía final de Computación Gráfica. Documento de investigación y desarrollo sobre los temas abordados en la exposición.')">
+                                        <i class="fas fa-file-pdf file-icon"
+                                           style="color: #e53e3e; filter: drop-shadow(0 0 14px rgba(229,62,62,0.55));"></i>
+                                        <p class="file-title">Mono_CG Final</p>
+                                        <p class="file-desc">Monografía final de Computación Gráfica. Haz clic para previsualizar el documento.</p>
+                                        <span class="badge mt-1"
+                                              style="background: rgba(229,62,62,0.12); color: #e53e3e; border: 1px solid rgba(229,62,62,0.4); font-size: 0.72rem; padding: 6px 14px; border-radius: 30px;">
+                                            <i class="fas fa-eye me-1"></i> Ver PDF
+                                        </span>
+                                    </div>
+                                </div>
+
+                            </div><!-- /row archivos -->
+
+                            <!-- Visor inline del PDF de exposición -->
+                            <div class="row mt-4" id="expo-pdf-viewer-wrap" style="display:none;">
+                                <div class="col-md-8">
+                                    <iframe id="expoPDFVisor" src="" width="100%" height="520px"
+                                        style="border-radius:12px; border:1px solid rgba(229,62,62,0.3);"></iframe>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 h-100 d-flex flex-column justify-content-between"
+                                         style="background: rgba(255,255,255,0.04); border-radius:12px; border:1px solid rgba(229,62,62,0.15);">
+                                        <div>
+                                            <h5 id="expoPDFTitulo" style="font-family:'Orbitron',monospace; font-size:1rem; color:#e53e3e;">—</h5>
+                                            <p id="expoPDFDesc" class="text-muted mt-2" style="font-size:0.84rem; line-height:1.6;"></p>
+                                        </div>
+                                        <a id="expoPDFLink" href="#" download
+                                           class="btn btn-sm mt-3 w-100"
+                                           style="background: rgba(229,62,62,0.12); color:#e53e3e; border:1px solid rgba(229,62,62,0.4); border-radius:10px; font-size:0.8rem;">
+                                            <i class="fas fa-download me-1"></i> Descargar PDF
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div><!-- /folder-content Exposición -->
+                    </div><!-- /folder-container Exposición -->
+                    <!-- ══════════════════════════════════════════════════════ -->
+
                 </div><!-- /parent-folder-content CG -->
             </div><!-- /parent-folder CG -->
 
@@ -533,7 +649,7 @@
 
 
             <div class="text-center mt-4 opacity-50 small">
-                <i class="fas fa-folder-tree"></i> Estructura: Computación Gráfica (Act. 4 · 5 · 6) &nbsp;·&nbsp; Física II
+                <i class="fas fa-folder-tree"></i> Estructura: Computación Gráfica (Act. 4 · 5 · 6 · Exposición) &nbsp;·&nbsp; Física II
             </div>
 
         </div>
@@ -589,7 +705,7 @@
             if (chevron) chevron.style.transform = isOpen ? 'rotate(-90deg)' : 'rotate(0deg)';
         }
 
-        /* ── Visor PDF ── */
+        /* ── Visor PDF (Actividad 6) ── */
         let pdfActual = '';
         function cargarPDF(ruta, titulo, descripcion) {
             document.getElementById('visorPDF').src = ruta;
@@ -601,6 +717,23 @@
             if (!pdfActual) { alert('Selecciona un PDF primero 😅'); return; }
             const link = document.createElement('a');
             link.href = pdfActual; link.download = ''; link.click();
+        }
+
+        /* ── Visor PDF (Exposición) ── */
+        function abrirExpoPDF(ruta, titulo, descripcion) {
+            const wrap  = document.getElementById('expo-pdf-viewer-wrap');
+            const frame = document.getElementById('expoPDFVisor');
+            const tit   = document.getElementById('expoPDFTitulo');
+            const desc  = document.getElementById('expoPDFDesc');
+            const link  = document.getElementById('expoPDFLink');
+
+            frame.src    = ruta;
+            tit.textContent  = titulo;
+            desc.textContent = descripcion;
+            link.href        = ruta;
+
+            wrap.style.display = 'flex';
+            wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
     </script>
 </body>

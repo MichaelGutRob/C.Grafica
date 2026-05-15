@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Aplicaciones de Modelado 3D — Demo</title>
+  <style>
+    /* ── Reset & Base ─────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap');
+
+    :root {
+      --bg:        #0a0e1a;
+      --panel:     #0f1626;
+      --border:    #1e2d4a;
+      --accent:    #00aaff;
+      --accent2:   #00ffcc;
+      --warn:      #ff6b35;
+      --text:      #c8d8f0;
+      --dim:       #5a7090;
+      --code-bg:   #080c14;
+      --font-ui:   'Syne', sans-serif;
+      --font-code: 'Share Tech Mono', monospace;
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-ui);
+      overflow: hidden;
+    }
+
+    /* ── Layout ───────────────────────────────── */
+    #app {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      grid-template-rows: 52px 1fr;
+      height: 100vh;
+    }
+
+    /* ── Header ───────────────────────────────── */
+    #header {
+      grid-column: 1 / -1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 0 20px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+    }
+    #header .logo {
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--accent);
+    }
+    #header .sep { flex: 1; }
+    #header .tag {
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: var(--dim);
+      border: 1px solid var(--border);
+      padding: 3px 10px;
+      border-radius: 2px;
+    }
+    #fps-counter {
+      font-family: var(--font-code);
+      font-size: 11px;
+      color: var(--accent2);
+      min-width: 60px;
+      text-align: right;
+    }
+
+    /* ── Left panel ───────────────────────────── */
+    #panel {
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      overflow-x: hidden;
+    }
+    #panel::-webkit-scrollbar { width: 4px; }
+    #panel::-webkit-scrollbar-track { background: transparent; }
+    #panel::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .section-title {
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: var(--dim);
+      padding: 16px 16px 8px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── Controls ─────────────────────────────── */
+    .ctrl-group { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .ctrl-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--dim);
+      margin-bottom: 8px;
+      display: block;
+    }
+
+    /* Geometry buttons */
+    .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .btn-geo {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-family: var(--font-code);
+      font-size: 11px;
+      padding: 8px 4px;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: all .15s;
+      text-align: center;
+    }
+    .btn-geo:hover  { border-color: var(--accent); color: var(--accent); }
+    .btn-geo.active { border-color: var(--accent); background: rgba(0,170,255,.12); color: var(--accent); }
+
+    /* Sliders */
+    .slider-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .slider-name { font-family: var(--font-code); font-size: 11px; color: var(--dim); min-width: 80px; }
+    .slider-val  { font-family: var(--font-code); font-size: 11px; color: var(--accent2); min-width: 36px; text-align: right; }
+    input[type=range] {
+      flex: 1;
+      -webkit-appearance: none;
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      outline: none;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      cursor: pointer;
+      transition: transform .1s;
+    }
+    input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.3); }
+
+    /* Color pickers */
+    .color-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .color-swatch {
+      width: 28px; height: 28px;
+      border-radius: 3px;
+      border: 2px solid transparent;
+      cursor: pointer;
+      transition: transform .15s, border-color .15s;
+    }
+    .color-swatch:hover  { transform: scale(1.15); }
+    .color-swatch.active { border-color: #fff; }
+
+    /* Toggle switches */
+    .toggle-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+    .toggle-row:last-child { margin-bottom: 0; }
+    .toggle-text { font-family: var(--font-code); font-size: 11px; color: var(--text); }
+    .toggle {
+      position: relative; width: 36px; height: 18px;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .slider-toggle {
+      position: absolute; inset: 0;
+      background: var(--border);
+      border-radius: 18px;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .slider-toggle::before {
+      content: '';
+      position: absolute;
+      width: 12px; height: 12px;
+      border-radius: 50%;
+      background: var(--dim);
+      top: 3px; left: 3px;
+      transition: transform .2s, background .2s;
+    }
+    .toggle input:checked + .slider-toggle { background: rgba(0,170,255,.3); }
+    .toggle input:checked + .slider-toggle::before { transform: translateX(18px); background: var(--accent); }
+
+    /* ── Code panel ───────────────────────────── */
+    #code-panel {
+      padding: 0;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+    #code-display {
+      font-family: var(--font-code);
+      font-size: 11px;
+      line-height: 1.7;
+      padding: 12px 16px;
+      background: var(--code-bg);
+      overflow-y: auto;
+      flex: 1;
+      white-space: pre;
+    }
+    #code-display::-webkit-scrollbar { width: 4px; }
+    #code-display::-webkit-scrollbar-thumb { background: var(--border); }
+
+    .ck { color: #6a8fba; }   /* keyword */
+    .cv { color: var(--accent2); } /* var */
+    .cs { color: #e5a060; }   /* string */
+    .cc { color: #3d5a7a; }   /* comment */
+    .cn { color: #ff9966; }   /* number */
+    .cm { color: var(--accent); } /* method */
+
+    /* ── Canvas ───────────────────────────────── */
+    #canvas-wrap {
+      position: relative;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    #canvas-wrap canvas { display: block; }
+
+    /* Overlay info */
+    #overlay {
+      position: absolute;
+      top: 14px; left: 14px;
+      pointer-events: none;
+    }
+    .ov-row { display: flex; gap: 10px; margin-bottom: 6px; }
+    .ov-label {
+      font-family: var(--font-code);
+      font-size: 10px;
+      color: var(--dim);
+      letter-spacing: 1px;
+    }
+    .ov-val {
+      font-family: var(--font-code);
+      font-size: 10px;
+      color: var(--accent2);
+    }
+
+    /* Bottom bar */
+    #bottombar {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      padding: 8px 16px;
+      background: linear-gradient(transparent, rgba(10,14,26,.95));
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      pointer-events: none;
+    }
+    .bb-text {
+      font-family: var(--font-code);
+      font-size: 10px;
+      color: var(--dim);
+    }
+    .bb-key {
+      display: inline-block;
+      border: 1px solid var(--border);
+      padding: 1px 6px;
+      border-radius: 2px;
+      color: var(--text);
+      font-family: var(--font-code);
+      font-size: 10px;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <!-- HEADER -->
+  <header id="header">
+    <span class="logo">Modelado 3D · Demo</span>
+    <span class="tag">Three.js · WebGL</span>
+    <span class="sep"></span>
+    <span class="tag">Monografía — Aplicaciones de Modelado 3D</span>
+    <span id="fps-counter">-- fps</span>
+  </header>
+
+  <!-- LEFT PANEL -->
+  <aside id="panel">
+
+    <div class="section-title">// geometría</div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Tipo de Modelo</span>
+      <div class="btn-grid">
+        <button class="btn-geo active" data-geo="box">BoxGeometry</button>
+        <button class="btn-geo" data-geo="sphere">SphereGeometry</button>
+        <button class="btn-geo" data-geo="torus">TorusGeometry</button>
+        <button class="btn-geo" data-geo="cone">ConeGeometry</button>
+        <button class="btn-geo" data-geo="cylinder">CylinderGeometry</button>
+        <button class="btn-geo" data-geo="torusknot">TorusKnotGeo</button>
+      </div>
+    </div>
+
+    <div class="section-title">// material</div>
+    <div class="ctrl-group">
+      <span class="ctrl-label">Color Base</span>
+      <div class="color-row" id="color-swatches">
+        <div class="color-swatch active" data-color="0x00aaff" style="background:#00aaff"></div>
+        <div class="color-swatch" data-color="0x00ffcc" style="background:#00ffcc"></div>
+        <div class="color-swatch" data-color="0xff6b35" style="background:#ff6b35"></div>
+        <div class="color-swatch" data-color="0xffdd00" style="background:#ffdd00"></div>
+        <div class="color-swatch" data-color="0xff3366" style="background:#ff3366"></div>
+        <div class="color-swatch" data-color="0xaa44ff" style="background:#aa44ff"></div>
+        <div class="color-swatch" data-color="0xffffff" style="background:#ffffff"></div>
+        <div class="color-swatch" data-color="0x44ff88" style="background:#44ff88"></div>
+      </div>
+    </div>
+    <div class="ctrl-group">
+      <div class="slider-row">
+        <span class="slider-name">roughness</span>
+        <input type="range" id="sl-rough" min="0" max="100" value="30">
+        <span class="slider-val" id="vl-rough">0.30</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-name">metalness</span>
+        <input type="range" id="sl-metal" min="0" max="100" value="70">
+        <span class="slider-val" id="vl-metal">0.70</span>
+      </div>
+    </div>
+
+    <div class="section-title">// rotación</div>
+    <div class="ctrl-group">
+      <div class="slider-row">
+        <span class="slider-name">vel. X</span>
+        <input type="range" id="sl-rx" min="0" max="100" value="10">
+        <span class="slider-val" id="vl-rx">0.010</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-name">vel. Y</span>
+        <input type="range" id="sl-ry" min="0" max="100" value="10">
+        <span class="slider-val" id="vl-ry">0.010</span>
+      </div>
+    </div>
+
+    <div class="section-title">// iluminación</div>
+    <div class="ctrl-group">
+      <div class="slider-row">
+        <span class="slider-name">ambiente</span>
+        <input type="range" id="sl-amb" min="0" max="100" value="40">
+        <span class="slider-val" id="vl-amb">0.40</span>
+      </div>
+      <div class="slider-row">
+        <span class="slider-name">directional</span>
+        <input type="range" id="sl-dir" min="0" max="200" value="100">
+        <span class="slider-val" id="vl-dir">1.00</span>
+      </div>
+    </div>
+
+    <div class="section-title">// opciones</div>
+    <div class="ctrl-group">
+      <div class="toggle-row">
+        <span class="toggle-text">Wireframe</span>
+        <label class="toggle"><input type="checkbox" id="tog-wire"><span class="slider-toggle"></span></label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-text">Sombras</span>
+        <label class="toggle"><input type="checkbox" id="tog-shadow" checked><span class="slider-toggle"></span></label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-text">Grilla</span>
+        <label class="toggle"><input type="checkbox" id="tog-grid" checked><span class="slider-toggle"></span></label>
+      </div>
+      <div class="toggle-row">
+        <span class="toggle-text">Animación</span>
+        <label class="toggle"><input type="checkbox" id="tog-anim" checked><span class="slider-toggle"></span></label>
+      </div>
+    </div>
+
+    <!-- CÓDIGO VIVO -->
+    <div class="section-title">// código activo</div>
+    <div id="code-panel">
+      <div id="code-display"></div>
+    </div>
+
+  </aside>
+
+  <!-- CANVAS -->
+  <div id="canvas-wrap">
+    <div id="overlay">
+      <div class="ov-row">
+        <span class="ov-label">GEOMETRÍA</span><span class="ov-val" id="ov-geo">BoxGeometry</span>
+      </div>
+      <div class="ov-row">
+        <span class="ov-label">POLÍGONOS&nbsp;</span><span class="ov-val" id="ov-poly">--</span>
+      </div>
+      <div class="ov-row">
+        <span class="ov-label">VÉRTICES&nbsp;&nbsp;</span><span class="ov-val" id="ov-vert">--</span>
+      </div>
+    </div>
+    <div id="bottombar">
+      <span class="bb-text">Arrastrar para rotar</span>
+      <span class="bb-key">LMB</span>
+      <span class="bb-text">· Scroll para zoom</span>
+      <span class="bb-key">WHEEL</span>
+      <span class="bb-text">· Mover cámara</span>
+      <span class="bb-key">RMB</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- Three.js desde CDN (sin instalación) -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+// ════════════════════════════════════════════════════════
+//  CÓDIGO DEL DOCUMENTO — Aplicaciones de Modelado 3D
+//  Tal como aparece en la monografía, más controles live
+// ════════════════════════════════════════════════════════
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ── 1. ESCENA ────────────────────────────────────────────
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x0a0e1a);
+scene.fog = new THREE.Fog(0x0a0e1a, 12, 30);
+
+// ── 2. CÁMARA PERSPECTIVA ────────────────────────────────
+const wrap    = document.getElementById('canvas-wrap');
+const W = () => wrap.clientWidth;
+const H = () => wrap.clientHeight;
+
+const camera = new THREE.PerspectiveCamera(75, W() / H(), 0.1, 1000);
+camera.position.set(0, 2, 5);
+
+// ── 3. RENDERIZADOR ──────────────────────────────────────
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(W(), H());
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+wrap.appendChild(renderer.domElement);
+
+// ── 4. CONTROLES DE ÓRBITA ───────────────────────────────
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.dampingFactor = 0.05;
+controls.minDistance = 2;
+controls.maxDistance = 15;
+
+// ── 5. GRILLA ────────────────────────────────────────────
+const grid = new THREE.GridHelper(20, 40, 0x1e2d4a, 0x1e2d4a);
+scene.add(grid);
+
+// ── 6. PLATAFORMA (suelo con sombra) ─────────────────────
+const floorGeo = new THREE.PlaneGeometry(20, 20);
+const floorMat = new THREE.MeshStandardMaterial({
+  color: 0x0d1525, roughness: 1, metalness: 0
+});
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.position.y = -1.5;
+floor.receiveShadow = true;
+scene.add(floor);
+
+// ── 7. GEOMETRÍA ─────────────────────────────────────────
+const geoMap = {
+  box:       () => new THREE.BoxGeometry(1.6, 1.6, 1.6),
+  sphere:    () => new THREE.SphereGeometry(1, 32, 32),
+  torus:     () => new THREE.TorusGeometry(1, 0.4, 16, 100),
+  cone:      () => new THREE.ConeGeometry(1, 2, 32),
+  cylinder:  () => new THREE.CylinderGeometry(0.8, 0.8, 2, 32),
+  torusknot: () => new THREE.TorusKnotGeometry(0.8, 0.28, 120, 16),
+};
+const geoNames = {
+  box: 'BoxGeometry', sphere: 'SphereGeometry', torus: 'TorusGeometry',
+  cone: 'ConeGeometry', cylinder: 'CylinderGeometry', torusknot: 'TorusKnotGeometry'
+};
+
+let currentGeoKey = 'box';
+
+// ── 8. MATERIAL ──────────────────────────────────────────
+const material = new THREE.MeshStandardMaterial({
+  color: 0x00aaff,
+  roughness: 0.3,
+  metalness: 0.7
+});
+
+// ── 9. MESH ──────────────────────────────────────────────
+let mesh = new THREE.Mesh(geoMap[currentGeoKey](), material);
+mesh.castShadow = true;
+scene.add(mesh);
+
+// ── 10. ILUMINACIÓN ─────────────────────────────────────
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
+scene.add(ambientLight);
+
+const dirLight = new THREE.DirectionalLight(0xffffff, 1);
+dirLight.position.set(5, 10, 7.5);
+dirLight.castShadow = true;
+dirLight.shadow.mapSize.width  = 2048;
+dirLight.shadow.mapSize.height = 2048;
+dirLight.shadow.camera.near = 0.1;
+dirLight.shadow.camera.far  = 40;
+scene.add(dirLight);
+
+// Luz de relleno (azul fría)
+const fillLight = new THREE.PointLight(0x004488, 0.8, 20);
+fillLight.position.set(-5, 3, -5);
+scene.add(fillLight);
+
+// ── 11. ESTADO DE ANIMACIÓN ──────────────────────────────
+const state = { rotX: 0.01, rotY: 0.01, animating: true };
+
+// ── 12. BUCLE DE ANIMACIÓN ───────────────────────────────
+let lastTime = performance.now();
+let frames = 0;
+let fps = 0;
+
+function animate() {
+  requestAnimationFrame(animate);
+
+  // FPS counter
+  frames++;
+  const now = performance.now();
+  if (now - lastTime >= 1000) {
+    fps = frames;
+    frames = 0;
+    lastTime = now;
+    document.getElementById('fps-counter').textContent = fps + ' fps';
+  }
+
+  if (state.animating) {
+    mesh.rotation.x += state.rotX;
+    mesh.rotation.y += state.rotY;
+  }
+
+  controls.update();
+  renderer.render(scene, camera);
+}
+animate();
+
+// ── 13. RESIZE ───────────────────────────────────────────
+window.addEventListener('resize', () => {
+  camera.aspect = W() / H();
+  camera.updateProjectionMatrix();
+  renderer.setSize(W(), H());
+});
+
+// ════════════════════════════════════════════════════════
+//  CONTROLES DE LA INTERFAZ
+// ════════════════════════════════════════════════════════
+
+// Geometría
+document.querySelectorAll('.btn-geo').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const key = btn.dataset.geo;
+    currentGeoKey = key;
+    // reemplazar geometría
+    mesh.geometry.dispose();
+    mesh.geometry = geoMap[key]();
+    // actualizar overlay
+    document.getElementById('ov-geo').textContent  = geoNames[key];
+    document.getElementById('ov-poly').textContent = (mesh.geometry.index
+      ? mesh.geometry.index.count / 3
+      : mesh.geometry.attributes.position.count / 3
+    ).toFixed(0);
+    document.getElementById('ov-vert').textContent =
+      mesh.geometry.attributes.position.count;
+    // botones activos
+    document.querySelectorAll('.btn-geo').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    updateCode();
+  });
+});
+// Trigger inicial overlay
+setTimeout(() => document.querySelector('[data-geo="box"]').click(), 100);
+
+// Color
+document.querySelectorAll('.color-swatch').forEach(sw => {
+  sw.addEventListener('click', () => {
+    material.color.setHex(parseInt(sw.dataset.color));
+    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('active'));
+    sw.classList.add('active');
+    updateCode();
+  });
+});
+
+// Sliders
+function bindSlider(id, valId, digits, cb) {
+  const el = document.getElementById(id);
+  const vl = document.getElementById(valId);
+  el.addEventListener('input', () => {
+    const v = el.value / 100;
+    vl.textContent = v.toFixed(digits);
+    cb(v);
+    updateCode();
+  });
+}
+bindSlider('sl-rough', 'vl-rough', 2, v => material.roughness = v);
+bindSlider('sl-metal', 'vl-metal', 2, v => material.metalness = v);
+bindSlider('sl-rx',    'vl-rx',    3, v => state.rotX = v * 0.2);
+bindSlider('sl-ry',    'vl-ry',    3, v => state.rotY = v * 0.2);
+bindSlider('sl-amb',   'vl-amb',   2, v => ambientLight.intensity = v);
+
+const slDir = document.getElementById('sl-dir');
+const vlDir = document.getElementById('vl-dir');
+slDir.addEventListener('input', () => {
+  const v = slDir.value / 100;
+  vlDir.textContent = v.toFixed(2);
+  dirLight.intensity = v;
+  updateCode();
+});
+
+// Toggles
+document.getElementById('tog-wire').addEventListener('change', e => {
+  material.wireframe = e.target.checked;
+  updateCode();
+});
+document.getElementById('tog-shadow').addEventListener('change', e => {
+  renderer.shadowMap.enabled = e.target.checked;
+  mesh.castShadow  = e.target.checked;
+  floor.receiveShadow = e.target.checked;
+  updateCode();
+});
+document.getElementById('tog-grid').addEventListener('change', e => {
+  grid.visible = e.target.checked;
+});
+document.getElementById('tog-anim').addEventListener('change', e => {
+  state.animating = e.target.checked;
+});
+
+// ── CÓDIGO VIVO ──────────────────────────────────────────
+function h(cls, txt) { return `<span class="${cls}">${txt}</span>`; }
+const K = t => h('ck', t);
+const V = t => h('cv', t);
+const S = t => h('cs', `'${t}'`);
+const C = t => h('cc', t);
+const N = t => h('cn', t);
+const M = t => h('cm', t);
+
+function updateCode() {
+  const geo   = geoNames[currentGeoKey];
+  const color = '#' + material.color.getHexString().toUpperCase();
+  const rough = material.roughness.toFixed(2);
+  const metal = material.metalness.toFixed(2);
+  const wire  = material.wireframe;
+  const amb   = ambientLight.intensity.toFixed(2);
+  const dir   = dirLight.intensity.toFixed(2);
+  const rotX  = state.rotX.toFixed(3);
+  const rotY  = state.rotY.toFixed(3);
+
+  document.getElementById('code-display').innerHTML =
+`${C('// ── Escena ──────────────────────')}
+${K('const')} ${V('scene')} = ${K('new')} THREE.${M('Scene')}();
+${V('scene')}.background = ${K('new')} THREE.${M('Color')}(${N('0x0a0e1a')});
+
+${C('// ── Cámara perspectiva ───────────')}
+${K('const')} ${V('camera')} = ${K('new')} THREE.${M('PerspectiveCamera')}(
+  ${N('75')}, W() / H(), ${N('0.1')}, ${N('1000')}
+);
+${V('camera')}.position.${M('set')}(${N('0')}, ${N('2')}, ${N('5')});
+
+${C('// ── Renderizador ─────────────────')}
+${K('const')} ${V('renderer')} = ${K('new')} THREE.${M('WebGLRenderer')}(
+  { antialias: ${K('true')} }
+);
+${V('renderer')}.shadowMap.enabled = ${K(wire ? 'false' : 'true')};
+
+${C('// ── Geometría: ' + geo + ' ──')}
+${K('const')} ${V('geometry')} = ${K('new')} THREE.${M(geo)}();
+
+${C('// ── Material ─────────────────────')}
+${K('const')} ${V('material')} = ${K('new')} THREE.${M('MeshStandardMaterial')}({
+  color:     ${N(color)},
+  roughness: ${N(rough)},
+  metalness: ${N(metal)},
+  wireframe: ${K(String(wire))},
+});
+
+${C('// ── Mesh ─────────────────────────')}
+${K('const')} ${V('mesh')} = ${K('new')} THREE.${M('Mesh')}(
+  ${V('geometry')}, ${V('material')}
+);
+${V('mesh')}.castShadow = ${K('true')};
+${V('scene')}.${M('add')}(${V('mesh')});
+
+${C('// ── Iluminación ──────────────────')}
+${K('const')} ${V('ambLight')} = ${K('new')} THREE.${M('AmbientLight')}(
+  ${N('0xffffff')}, ${N(amb)}
+);
+${V('scene')}.${M('add')}(${V('ambLight')});
+
+${K('const')} ${V('dirLight')} = ${K('new')} THREE.${M('DirectionalLight')}(
+  ${N('0xffffff')}, ${N(dir)}
+);
+${V('dirLight')}.position.${M('set')}(${N('5')}, ${N('10')}, ${N('7.5')});
+${V('dirLight')}.castShadow = ${K('true')};
+${V('scene')}.${M('add')}(${V('dirLight')});
+
+${C('// ── Animación ────────────────────')}
+${K('function')} ${M('animate')}() {
+  ${M('requestAnimationFrame')}(${M('animate')});
+  ${V('mesh')}.rotation.x += ${N(rotX)};
+  ${V('mesh')}.rotation.y += ${N(rotY)};
+  ${V('renderer')}.${M('render')}(${V('scene')}, ${V('camera')});
+}
+${M('animate')}();`;
+}
+
+updateCode();
+</script>
+</body>
+</html>
